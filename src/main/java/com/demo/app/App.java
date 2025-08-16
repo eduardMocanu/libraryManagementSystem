@@ -14,6 +14,7 @@ import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
@@ -38,7 +39,8 @@ public class App {
         System.out.println("6.REMOVE CLIENT");
         System.out.println("7.ADD BOOK");
         System.out.println("8.REMOVE BOOK");
-        System.out.println("9.EXIT");
+        System.out.println("9.CHECK ALL LOANS FOR A CLIENT");
+        System.out.println("10.EXIT");
         System.out.print("YOUR INPUT: ");
     }
 
@@ -72,7 +74,7 @@ public class App {
                     addLoan(scanner, loans, books, bookServiceCsv, loanServiceCsv);
                 }
                 case DEACTIVATE_LOAN -> {
-                    deactivateLoan(scanner, books, loans, bookServiceCsv, loanServiceCsv);
+                    deactivateLoanTechnicalProblem(scanner, books, loans, bookServiceCsv, loanServiceCsv);
                 }
                 case ADD_CLIENT -> {
                     addClient(scanner, clients, clientServiceCsv);
@@ -85,6 +87,9 @@ public class App {
                 }
                 case REMOVE_BOOK -> {
                     removeBook(scanner, books, bookServiceCsv);
+                }
+                case CHECK_ACTIVE_LOANS_CLIENT -> {
+                    checkActiveLoansClient(scanner, loans, books, clients);
                 }
                 case EXIT ->{
                     run = false;
@@ -174,8 +179,8 @@ public class App {
         bookServiceCsv.writeCSVFile(books);
         loanServiceCsv.writeCSVFile(loans);
     }
-    //deactivateLoan -> giveBookBack
-    static void deactivateLoan(Scanner scanner, Map<String, Book> books, Map<String, Loan> loans, BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv){
+
+    static void deactivateLoanTechnicalProblem(Scanner scanner, Map<String, Book> books, Map<String, Loan> loans, BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv){
         String loanId;
         System.out.println("Give me the id of the loan you want to deactivate");
         loanId = scanner.nextLine().trim();
@@ -242,6 +247,25 @@ public class App {
         BookController.removeBook(books, ISBN);
         //books
         bookServiceCsv.writeCSVFile(books);
+    }
+
+    static void checkActiveLoansClient(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients){
+        String clientId;
+        System.out.println("Provide me the user ID:");
+        clientId = scanner.nextLine().trim();
+        if(clients.containsKey(clientId)){
+            HashSet<Loan> loansOfClient = ClientController.getLoansOfClient(loans, clientId);
+            if(!loansOfClient.isEmpty()){
+                for(Loan i:loansOfClient){
+                    System.out.println("Loan ID: " + i.getId() + " for book: " + books.get(i.getBookISBN()).getName());
+                }
+            }
+            else{
+                System.out.println("No active loans");
+            }
+        }else{
+            System.out.println("The client ID is not valid");
+        }
     }
 
     static void exit(BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv, ClientServiceCsv clientServiceCsv, Map<String, Book> books, Map<String, Client> clients, Map<String, Loan> loans){

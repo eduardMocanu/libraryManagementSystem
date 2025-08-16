@@ -3,6 +3,7 @@ package com.demo.controller;
 import com.demo.model.Client;
 import com.demo.model.Loan;
 
+import java.util.HashSet;
 import java.util.Map;
 
 public abstract class ClientController {
@@ -48,5 +49,16 @@ public abstract class ClientController {
         return String.valueOf(maximum+1);
     }
 
+    public static HashSet<Loan> getLoansOfClient(Map<String, Loan> loans, String clientId){
+            HashSet<Loan> returnValue = new HashSet<>();
+            for(Loan i:loans.values()){
+                if(i.getClientId().equals(clientId)){
+                    returnValue.add(i);
+                }
+            }
+            return returnValue;
+
+
+    }
 
 }
