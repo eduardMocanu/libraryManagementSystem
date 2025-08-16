@@ -6,12 +6,21 @@ import com.demo.model.Loan;
 import com.demo.service.EmailService;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class LoanController {
 
     public static void addLoan(Map<String, Book> books, Map<String, Loan> loans, Loan loan){
-        if(loan.getBookISBN().isEmpty()){
+        Set<String> booksISBNExpired = checkExpiredLoansClient(loans, loan.getClientId());
+        if(!booksISBNExpired.isEmpty()){
+            for(String i:booksISBNExpired){
+                System.out.println("Can't loan a book because you have an expired loan already for the book " + books.get(i).getName());
+            }
+        }
+        else if(loan.getBookISBN().isEmpty()){
             System.out.println("The ISBN is not found");
         }
         else if(loans.containsKey(loan.getId())){
@@ -69,5 +78,15 @@ public abstract class LoanController {
             maximum = Math.max(maximum, Integer.parseInt(i));
         }
         return String.valueOf(maximum+1);
+    }
+
+    public static Set<String> checkExpiredLoansClient(Map<String, Loan> loans, String clientId){
+        Set<String> returnValues = new HashSet<>();
+        for(Loan i:loans.values()){
+            if(i.getClientId().equals(clientId) && i.getActive() && i.getLoanEnd().isAfter(LocalDate.now())){
+                returnValues.add(i.getBookISBN());
+            }
+        }
+        return returnValues;
     }
 }

@@ -241,7 +241,6 @@ public class App {
         ISBN = BookController.getBookISBNByName(books, bookName);
         BookController.removeBook(books, ISBN);
         //books
-        
         bookServiceCsv.writeCSVFile(books);
     }
 
@@ -255,8 +254,9 @@ public class App {
 
 
     //TO DO:
-    //can't loan a new book if you have a loan that expired and never gave the book back
-    //check active loans by id of the client and list them all (that are active)/add to the menu something like deactivateLoanOfClient
+    //check active loans by id of the client and list them all (that are active) - checkActiveLoansForClient in menu
+    //add to the menu something like giveBackLoanedBookOfClient, by name
     //check history of client - list all loans that he ever had, active and inactive at that point - checkHistoryOfClient
-    //give the books back menu, the remove loan remains only for the possible technical problems
+    //loans dateStart > dateEnd should give a warning in the csv reader is best
+    //when looking for the isbn by name in case I find multiple books with the same name I store all of them and give the author name and that is how they choose it
 }
