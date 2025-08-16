@@ -241,6 +241,7 @@ public class App {
         ISBN = BookController.getBookISBNByName(books, bookName);
         BookController.removeBook(books, ISBN);
         //books
+        
         bookServiceCsv.writeCSVFile(books);
     }
 
