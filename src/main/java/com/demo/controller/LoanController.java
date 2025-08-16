@@ -89,4 +89,28 @@ public abstract class LoanController {
         }
         return returnValues;
     }
+
+    public static void giveBookBack(Map<String, Loan> loans, Map<String, Client> clients, Map<String, Book> books, String bookISBN, String clientID){
+        if(!books.containsKey(bookISBN)){
+            System.out.println("The given book is not in the database.");
+        } else if (!books.get(bookISBN).getStatusLoaned()) {
+            System.out.println("The given book is not loaned.");
+        }else if(!clients.containsKey(clientID)){
+            System.out.println("The given ID is not a registered member");
+        }else{
+            boolean ok = false;
+            for(Loan i: loans.values()){
+                if(i.getClientId().equals(clientID) && i.getBookISBN().equals(bookISBN) && i.getActive()){
+                    ok = true;
+                    i.setActive(false);
+                    books.get(bookISBN).setStatusLoaned(false);
+                    System.out.println("Thank you " + clients.get(clientID).getName() + " for giving the book back");
+                    break;
+                }
+            }
+            if(!ok){
+                System.out.println("The given client doesn't have such book loaned");
+            }
+        }
+    }
 }

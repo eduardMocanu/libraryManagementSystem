@@ -34,13 +34,14 @@ public class App {
         System.out.println("1.CHECK ALL CURRENT LOANS AND SEND EMAILS IF EXPIRED LOANS");
         System.out.println("2.CHECK A SPECIFIC LOAN");
         System.out.println("3.ADD LOAN");
-        System.out.println("4.DEACTIVATE LOAN");
+        System.out.println("4.DEACTIVATE LOAN BECAUSE OF TECHNICAL DIFFICULTIES");
         System.out.println("5.ADD CLIENT");
         System.out.println("6.REMOVE CLIENT");
         System.out.println("7.ADD BOOK");
         System.out.println("8.REMOVE BOOK");
         System.out.println("9.CHECK ALL LOANS FOR A CLIENT");
-        System.out.println("10.EXIT");
+        System.out.println("10.GIVE BACK LOANED BOOK");
+        System.out.println("11.EXIT");
         System.out.print("YOUR INPUT: ");
     }
 
@@ -90,6 +91,9 @@ public class App {
                 }
                 case CHECK_ACTIVE_LOANS_CLIENT -> {
                     checkActiveLoansClient(scanner, loans, books, clients);
+                }
+                case GIVE_BACK_LOANED_BOOK -> {
+                    giveBackLoanedBook(scanner, loans, books, clients, bookServiceCsv, loanServiceCsv);
                 }
                 case EXIT ->{
                     run = false;
@@ -254,7 +258,7 @@ public class App {
         System.out.println("Provide me the user ID:");
         clientId = scanner.nextLine().trim();
         if(clients.containsKey(clientId)){
-            HashSet<Loan> loansOfClient = ClientController.getLoansOfClient(loans, clientId);
+            HashSet<Loan> loansOfClient = ClientController.getActiveLoansOfClient(loans, clientId);
             if(!loansOfClient.isEmpty()){
                 for(Loan i:loansOfClient){
                     System.out.println("Loan ID: " + i.getId() + " for book: " + books.get(i.getBookISBN()).getName());
@@ -268,6 +272,19 @@ public class App {
         }
     }
 
+    static void giveBackLoanedBook(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients, BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv){
+        String bookName, bookISBN, clientID;
+        System.out.println("Give me the name of the book you want to give back:");
+        bookName = scanner.nextLine().trim().toUpperCase();
+        System.out.println("Give me your client ID");
+        clientID = scanner.nextLine().trim();
+        bookISBN = BookController.getBookISBNByName(books, bookName);
+        LoanController.giveBookBack(loans, clients, books, bookISBN, clientID);
+        //write
+        bookServiceCsv.writeCSVFile(books);
+        loanServiceCsv.writeCSVFile(loans);
+    }
+
     static void exit(BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv, ClientServiceCsv clientServiceCsv, Map<String, Book> books, Map<String, Client> clients, Map<String, Loan> loans){
         System.out.println("Exiting...");
         //all
@@ -278,9 +295,8 @@ public class App {
 
 
     //TO DO:
-    //check active loans by id of the client and list them all (that are active) - checkActiveLoansForClient in menu
     //add to the menu something like giveBackLoanedBookOfClient, by name
     //check history of client - list all loans that he ever had, active and inactive at that point - checkHistoryOfClient
     //loans dateStart > dateEnd should give a warning in the csv reader is best
-    //when looking for the isbn by name in case I find multiple books with the same name I store all of them and give the author name and that is how they choose it
+    //change getBookISBNByName so that in case there are 2 books with the same name to ask for the author to figure out
 }

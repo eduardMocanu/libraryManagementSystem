@@ -49,10 +49,10 @@ public abstract class ClientController {
         return String.valueOf(maximum+1);
     }
 
-    public static HashSet<Loan> getLoansOfClient(Map<String, Loan> loans, String clientId){
+    public static HashSet<Loan> getActiveLoansOfClient(Map<String, Loan> loans, String clientId){
             HashSet<Loan> returnValue = new HashSet<>();
             for(Loan i:loans.values()){
-                if(i.getClientId().equals(clientId)){
+                if(i.getClientId().equals(clientId) && i.getActive()){
                     returnValue.add(i);
                 }
             }
