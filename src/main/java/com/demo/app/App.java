@@ -181,7 +181,7 @@ public class App {
         scanner.nextLine();//to empty the buffer from the int
         System.out.println("Give me your id");
         clientId = scanner.nextLine().trim();
-        bookISBN = BookController.getBookISBNByName(books, bookName);
+        bookISBN = BookController.getBookISBNByName(scanner, books, bookName);
         dateEnd = dateNow.plusDays(length);
         LoanController.addLoan(books, loans, new Loan(idLoan, dateNow, dateEnd, clientId, bookISBN, true, false));
         //books+loans
@@ -252,7 +252,7 @@ public class App {
         String bookName, ISBN;
         System.out.println("Give me the name of the book you want to remove:");
         bookName = scanner.nextLine().toUpperCase().trim();
-        ISBN = BookController.getBookISBNByName(books, bookName);
+        ISBN = BookController.getBookISBNByName(scanner, books, bookName);
         BookController.removeBook(books, ISBN);
         //books
         bookServiceCsv.writeCSVFile(books);
@@ -283,7 +283,7 @@ public class App {
         bookName = scanner.nextLine().trim().toUpperCase();
         System.out.println("Give me your client ID");
         clientID = scanner.nextLine().trim();
-        bookISBN = BookController.getBookISBNByName(books, bookName);
+        bookISBN = BookController.getBookISBNByName(scanner, books, bookName);
         LoanController.giveBookBack(loans, clients, books, bookISBN, clientID);
         //write
         bookServiceCsv.writeCSVFile(books);
@@ -311,6 +311,5 @@ public class App {
 
 
     //TO DO:
-    //change getBookISBNByName so that in case there are 2 books with the same name to ask for the author to figure out
     //add a log csv where is written every command I run in the menu
 }

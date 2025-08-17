@@ -1,8 +1,12 @@
 package com.demo.controller;
 
 import com.demo.model.Book;
+import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public abstract class BookController {
 
@@ -32,12 +36,23 @@ public abstract class BookController {
         }
     }
 
-    public static String getBookISBNByName(Map<String, Book> books, String name){
+    public static String getBookISBNByName(Scanner scanner, Map<String, Book> books, String name){
+        Map<String, String> allBooksSameName = new HashMap<>();
         for(Book i: books.values()){
             if(i.getName().equals(name.toUpperCase().trim())){
-                return i.getISBN();
+                allBooksSameName.put(i.getAuthor(), i.getISBN());
             }
         }
-        return "";
+        if(allBooksSameName.isEmpty()){
+            return "";
+        }
+        else if(allBooksSameName.size() == 1){
+            return String.valueOf(allBooksSameName.values());
+        }
+        else{
+            System.out.println("There are multiple books with the same title, give me the author name");
+            String author = scanner.nextLine().trim().toUpperCase();
+            return allBooksSameName.getOrDefault(author, "");
+        }
     }
 }
