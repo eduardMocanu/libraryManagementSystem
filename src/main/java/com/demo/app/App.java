@@ -41,7 +41,8 @@ public class App {
         System.out.println("8.REMOVE BOOK");
         System.out.println("9.CHECK ALL LOANS FOR A CLIENT");
         System.out.println("10.GIVE BACK LOANED BOOK");
-        System.out.println("11.EXIT");
+        System.out.println("11.CHECK THE HISTORY OF CLIENT");
+        System.out.println("12.EXIT");
         System.out.print("YOUR INPUT: ");
     }
 
@@ -94,6 +95,9 @@ public class App {
                 }
                 case GIVE_BACK_LOANED_BOOK -> {
                     giveBackLoanedBook(scanner, loans, books, clients, bookServiceCsv, loanServiceCsv);
+                }
+                case CHECK_HISTORY_OF_CLIENT -> {
+                    checkHistoryOfClient(scanner, loans, books, clients);
                 }
                 case EXIT ->{
                     run = false;
@@ -285,6 +289,17 @@ public class App {
         loanServiceCsv.writeCSVFile(loans);
     }
 
+    static void checkHistoryOfClient(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients){
+        String clientId;
+        System.out.println("Give me the user ID:");
+        clientId = scanner.nextLine().trim();
+        if(clients.containsKey(clientId)){
+            ClientController.getHistoryOfClient(loans, books, clientId);
+        }else{
+            System.out.println("The client is not registered");
+        }
+    }
+
     static void exit(BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv, ClientServiceCsv clientServiceCsv, Map<String, Book> books, Map<String, Client> clients, Map<String, Loan> loans){
         System.out.println("Exiting...");
         //all
@@ -295,8 +310,7 @@ public class App {
 
 
     //TO DO:
-    //add to the menu something like giveBackLoanedBookOfClient, by name
-    //check history of client - list all loans that he ever had, active and inactive at that point - checkHistoryOfClient
     //loans dateStart > dateEnd should give a warning in the csv reader is best
     //change getBookISBNByName so that in case there are 2 books with the same name to ask for the author to figure out
+    //add a log csv where is written every command I run in the menu
 }

@@ -1,8 +1,10 @@
 package com.demo.controller;
 
+import com.demo.model.Book;
 import com.demo.model.Client;
 import com.demo.model.Loan;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -50,15 +52,26 @@ public abstract class ClientController {
     }
 
     public static HashSet<Loan> getActiveLoansOfClient(Map<String, Loan> loans, String clientId){
-            HashSet<Loan> returnValue = new HashSet<>();
-            for(Loan i:loans.values()){
-                if(i.getClientId().equals(clientId) && i.getActive()){
-                    returnValue.add(i);
-                }
+        HashSet<Loan> returnValue = new HashSet<>();
+        for (Loan i : loans.values()) {
+            if (i.getClientId().equals(clientId) && i.getActive()) {
+                returnValue.add(i);
             }
-            return returnValue;
-
-
+        }
+        return returnValue;
     }
 
+    public static void getHistoryOfClient(Map<String, Loan> loans, Map<String, Book> books, String clientId){
+        boolean ok = false;
+        for(Loan i:loans.values()){
+            if(i.getClientId().equals(clientId)){
+                ok = true;
+                String active = i.getActive() ? "active" : "not active";
+                System.out.println("Loan with id " + i.getId() + " is for book " + books.get(i.getBookISBN()).getName() + " and is " + active);
+            }
+        }
+        if(!ok){
+            System.out.println("You haven't loaned anything, ever");
+        }
+    }
 }
