@@ -59,6 +59,7 @@ public class App {
         books = bookServiceCsv.readCSVFile();
         loans = loanServiceCsv.readCSVFile();
         clients = clientServiceCsv.readCSVFile();
+        LoanController.removeInvalidDatesLoans(loans, books);
         MenuOptions menuOption;
 
         while(run){
@@ -310,7 +311,6 @@ public class App {
 
 
     //TO DO:
-    //loans dateStart > dateEnd should give a warning in the csv reader is best
     //change getBookISBNByName so that in case there are 2 books with the same name to ask for the author to figure out
     //add a log csv where is written every command I run in the menu
 }

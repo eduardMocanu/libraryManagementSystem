@@ -113,4 +113,13 @@ public abstract class LoanController {
             }
         }
     }
+
+    public static void removeInvalidDatesLoans(Map<String, Loan> loans, Map<String, Book> books){
+        for(Loan i : loans.values()){
+            if(i.getLoanStart().isAfter(i.getLoanEnd())){
+                deactivateLoan(loans, books, i.getId());
+                System.out.println("Loan " + i.getId() + " was set as inactive because of invalid dates");
+            }
+        }
+    }
 }

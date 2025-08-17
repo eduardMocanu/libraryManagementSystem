@@ -1,5 +1,6 @@
 package com.demo.service;
 
+import com.demo.controller.LoanController;
 import com.demo.model.Loan;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -26,7 +27,8 @@ public class LoanServiceCsv {
             header = csvReader.readNext();
             String[] row;
             while((row = csvReader.readNext()) != null){
-                Loan loan = new Loan(row[0].trim(), LocalDate.parse(row[1]), LocalDate.parse(row[2]), row[3], row[4], Boolean.parseBoolean(row[5]), Boolean.parseBoolean(row[6]));
+                LocalDate startTime = LocalDate.parse(row[1]), endTime = LocalDate.parse(row[2]);
+                Loan loan = new Loan(row[0].trim(), startTime, endTime, row[3], row[4], Boolean.parseBoolean(row[5]), Boolean.parseBoolean(row[6]));
                 fileRead.put(row[0], loan);
             }
         }
