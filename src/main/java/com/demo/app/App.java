@@ -9,7 +9,7 @@ import com.demo.model.Loan;
 import com.demo.service.BookServiceCsv;
 import com.demo.service.ClientServiceCsv;
 import com.demo.service.LoanServiceCsv;
-import io.github.cdimascio.dotenv.Dotenv;
+import com.demo.service.LogsServiceCsv;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 
@@ -20,10 +20,11 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class App {
+    public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("logs.csv");
+
     public static void main(String[] args){
-        Dotenv dotenv = Dotenv.load();
         String loansCSV = "loans.csv", clientsCSV = "clients.csv", booksCSV = "books.csv";
-        menuInputHandler(loansCSV, booksCSV, clientsCSV, dotenv);
+        menuInputHandler(loansCSV, booksCSV, clientsCSV);
     }
 
 
@@ -46,7 +47,7 @@ public class App {
         System.out.print("YOUR INPUT: ");
     }
 
-    static void menuInputHandler(String loansCSV, String booksCSV, String clientsCSV, Dotenv dotenv){
+    static void menuInputHandler(String loansCSV, String booksCSV, String clientsCSV){
         Map<String, Loan> loans;
         Map<String, Book> books;
         Map<String, Client> clients;
@@ -124,6 +125,7 @@ public class App {
                 scanner.nextLine();
             }
         }
+
     }
 
     static int readInt(Scanner scanner, String prompt){
@@ -153,6 +155,7 @@ public class App {
     static void checkALoanData(Scanner scanner, Map<String, Loan> loans, Map<String, Client> clients, Map<String, Book> books){
         System.out.println("Give me the id of the loan you want to check");
         String loanId = scanner.nextLine().trim();
+
         if(loans.containsKey(loanId) && loans.get(loanId).getActive()){
             Loan loan = loans.get(loanId);
             System.out.println("Loaned the book with the title:" + books.get(loan.getBookISBN()).getName());
@@ -187,6 +190,7 @@ public class App {
         //books+loans
         bookServiceCsv.writeCSVFile(books);
         loanServiceCsv.writeCSVFile(loans);
+        System.out.println("Added the loan with id: " + idLoan);
     }
 
     static void deactivateLoanTechnicalProblem(Scanner scanner, Map<String, Book> books, Map<String, Loan> loans, BookServiceCsv bookServiceCsv, LoanServiceCsv loanServiceCsv){
@@ -197,6 +201,7 @@ public class App {
         //books+loans
         bookServiceCsv.writeCSVFile(books);
         loanServiceCsv.writeCSVFile(loans);
+        System.out.println("Deactivated the loan with id: " + loanId);
     }
 
     static void addClient(Scanner scanner, Map<String, Client> clients, ClientServiceCsv clientServiceCsv){
@@ -311,5 +316,7 @@ public class App {
 
 
     //TO DO:
-    //add a log csv where is written every command I run in the menu
+    //make the messages in the log and console be descriptive enough and be for both - logs + console - logd should be more reliant on IDs
+    //refactor so that the csv for all the services is a property in the main class
+
 }

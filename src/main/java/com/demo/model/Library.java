@@ -13,44 +13,5 @@ public class Library {
         this.loans = loans;
     }
 
-    //GETTERS
-    public Map<String, Book> getBooks() {
-        return books;
-    }
 
-    public Map<String, Client> getClients() {
-        return clients;
-    }
-
-    public Map<String, Loan> getLoans() {
-        return loans;
-    }
-    //ADDITION
-
-    public void addClient(Client client){
-        if(clients.containsKey(client.getId())){
-            System.out.println("Unable to add the client, the id already exists");
-        }
-        else{
-            clients.put(client.getId(), client);
-        }
-    }
-
-    public void addBook(Book book){
-        if(books.containsKey(book.getISBN())){
-            System.out.println("Unable to add the book, the ISBN already exists");
-        }
-        else{
-            books.put(book.getISBN(), book);
-        }
-    }
-
-    public void addLoan(Loan loan){
-        if(loans.containsKey(loan.getId())){
-            System.out.println("Unable to add the loan, the id already exists");
-        }
-        else{
-            loans.put(loan.getId(), loan);
-        }
-    }
 }
