@@ -20,8 +20,7 @@ public abstract class LoanController {
             }
         }
         else if(loan.getBookISBN().isEmpty()){
-            System.out.println("The ISBN is not found");
-        }
+            System.out.println("The ISBN is not found");}
         else if(loans.containsKey(loan.getId())){
             System.out.println("Can't add the loan, the id is already added");
         }
@@ -31,7 +30,6 @@ public abstract class LoanController {
         else{
             loans.put(loan.getId(), loan);
             System.out.println("The loan was successfully added to the database with the id " + loan.getId());
-            //modify the status of the book to true; statusBookLoaned = true
             books.get(loan.getBookISBN()).setStatusLoaned(true);
         }
     }

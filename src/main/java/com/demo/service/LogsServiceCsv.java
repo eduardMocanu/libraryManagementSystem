@@ -4,6 +4,8 @@ import com.opencsv.CSVWriter;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.time.LocalDate;
+import java.util.Date;
 
 public class LogsServiceCsv {
     private final String file;
@@ -14,7 +16,7 @@ public class LogsServiceCsv {
 
     public void writeToLogsCsv(String prompt){
         try(CSVWriter writer = new CSVWriter(new FileWriter(file, true))){
-            String[] line = {prompt};
+            String[] line = {prompt, String.valueOf(new Date())};
             writer.writeNext(line);
         }catch(Exception e){
             System.out.println("Error on writing to the log file: " + e.getMessage());
