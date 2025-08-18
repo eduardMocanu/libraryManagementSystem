@@ -16,10 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.InputMismatchException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class App {
     public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("logs.csv");
@@ -176,6 +173,14 @@ public class App {
         String bookISBN, clientId;
         String idLoan = LoanController.getNewLoanId(loans), bookName;
         int length;
+        HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooks(books);
+        for(String i:booksAvailable.keySet()){
+            ArrayList<String> titles = booksAvailable.get(i);
+            System.out.println(i + ":");
+            for(String title:titles){
+                System.out.println("  -" + title);
+            }
+        }
         System.out.println("Give me the book name");
         bookName = scanner.nextLine().toUpperCase().trim();
         length = readInt(scanner, "Give me the length of the loan");
@@ -192,7 +197,6 @@ public class App {
         //books+loans
         bookServiceCsv.writeCSVFile(books);
         loanServiceCsv.writeCSVFile(loans);
-        System.out.println("Added the loan with id: " + idLoan);
         logsServiceCsv.writeToLogsCsv("Opted to add loan with loan ID: " + idLoan);
     }
 
@@ -327,7 +331,4 @@ public class App {
         logsServiceCsv.writeToLogsCsv("Exited");
     }
 
-
-    //TO DO:
-    //when adding a new loan, show on the screen the book options by name that are available
 }

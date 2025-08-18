@@ -2,6 +2,7 @@ package com.demo.controller;
 
 import com.demo.model.Book;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -53,4 +54,18 @@ public abstract class BookController {
             return allBooksSameName.getOrDefault(author, "");
         }
     }
+
+    public static HashMap<String, ArrayList<String>> getAvailableBooks(Map<String, Book> books){
+        HashMap<String, ArrayList<String>> returnValue = new HashMap<>();
+        for(Book i : books.values()){
+            if(!returnValue.containsKey(i.getAuthor())){
+                returnValue.put(i.getAuthor(), new ArrayList<String>());
+                returnValue.get(i.getAuthor()).add(i.getName());
+            }else{
+                returnValue.get(i.getAuthor()).add(i.getName());
+            }
+        }
+        return returnValue;
+    }
+
 }
