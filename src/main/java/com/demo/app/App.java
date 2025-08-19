@@ -19,10 +19,10 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class App {
-    public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("logs.csv");
-    public static final BookServiceCsv bookServiceCsv = new BookServiceCsv("books.csv");
-    public static final LoanServiceCsv loanServiceCsv = new LoanServiceCsv("loans.csv");
-    public static final ClientServiceCsv clientServiceCsv = new ClientServiceCsv("clients.csv");
+    public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("data/logs.csv");
+    public static final BookServiceCsv bookServiceCsv = new BookServiceCsv("data/books.csv");
+    public static final LoanServiceCsv loanServiceCsv = new LoanServiceCsv("data/loans.csv");
+    public static final ClientServiceCsv clientServiceCsv = new ClientServiceCsv("data/clients.csv");
 
     public static void main(String[] args){
         menuInputHandler();
@@ -330,5 +330,6 @@ public class App {
         clientServiceCsv.writeCSVFile(clients);
         logsServiceCsv.writeToLogsCsv("Exited");
     }
-
+    //TO DO:
+    //try and containerize it
 }
