@@ -36,17 +36,19 @@ public abstract class BookController {
     }
 
     public static String getBookISBNByName(Scanner scanner, Map<String, Book> books, String name){
-        Map<String, String> allBooksSameName = new HashMap<>();
+        HashMap<String, String> allBooksSameName = new HashMap<>();
+        String lastAuthor = "";
         for(Book i: books.values()){
-            if(i.getName().equals(name.toUpperCase().trim())){
+            if(i.getName().equals(name)){
                 allBooksSameName.put(i.getAuthor(), i.getISBN());
+                lastAuthor = i.getAuthor();
             }
         }
         if(allBooksSameName.isEmpty()){
             return "";
         }
         else if(allBooksSameName.size() == 1){
-            return String.valueOf(allBooksSameName.values());
+            return allBooksSameName.get(lastAuthor);
         }
         else{
             System.out.println("There are multiple books with the same title, give me the author name");
