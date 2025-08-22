@@ -12,8 +12,6 @@ import com.demo.service.LoanServiceCsv;
 import com.demo.service.LogsServiceCsv;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -330,6 +328,6 @@ public class App {
         clientServiceCsv.writeCSVFile(clients);
         logsServiceCsv.writeToLogsCsv("Exited");
     }
-    //TO DO:
-    //try and containerize it
+    //TO DO sql transition:
+    //dao folder - implements an interface and then an implementDaoMysqlBook class and like this for each one
 }
