@@ -1,9 +1,10 @@
 package com.demo.model;
 
 public class Client {
-    private final String name, surname, id, email;
+    private final String name, surname, email;
+    private final Integer id;
 
-    public Client( String id, String name, String surname, String email){
+    public Client( Integer id, String name, String surname, String email){
         this.name = name;
         this.surname = surname;
         this.id = id;

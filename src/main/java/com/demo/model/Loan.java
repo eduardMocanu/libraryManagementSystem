@@ -6,11 +6,11 @@ public class Loan {
     private final LocalDate loanEnd;
     private final String clientId;
     private final String bookISBN;
-    private final String id;
+    private final Integer id;
     private boolean active;
     private boolean emailed;
 
-    public Loan(String id, LocalDate loanStart, LocalDate loanEnd, String clientId, String bookISBN, boolean active, boolean emailed){
+    public Loan(Integer id, LocalDate loanStart, LocalDate loanEnd, String clientId, String bookISBN, boolean active, boolean emailed){
         this.loanStart = loanStart;
         this.loanEnd = loanEnd;
         this.clientId = clientId;

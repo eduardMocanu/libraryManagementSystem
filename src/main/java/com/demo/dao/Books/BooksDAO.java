@@ -9,6 +9,6 @@ public interface BooksDAO {
     void addBook(Book book);
     String getNameByISBN(String ISBN);
     void removeBookByISBN(String bookISBN);
-    Book getBookISBNByName(String bookName);
+    String getBookISBNByNameAndAuthor(String bookName, String author);
     HashMap<String, ArrayList<String>> getAvailableBooksStructuredByAuthor();
 }
