@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public interface LoansDAO {
     void addLoan(Loan loan);
-    HashMap<String, Loan> getExpiredLoans();
+    HashMap<Integer, Loan> getExpiredLoans();
     void deactivateLoan(Integer loanId);
     void getExpiredLoansClientById(Integer clientId);
     String getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);

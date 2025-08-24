@@ -7,16 +7,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
 
-public class ClientsDAOMysql {
+public class ClientsDAOMysql implements ClientsDAO{
 
     private final Connection conn;
 
     public ClientsDAOMysql(){
         this.conn = MysqlDbConnection.getInstance().getConnection();
     }
-
+    @Override
     public void addClient(Client client){
         String sqlQuery = "INSERT INTO Clients (Name, Email) VALUES (?, ?);";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
@@ -28,7 +27,7 @@ public class ClientsDAOMysql {
             errorManager(e.getMessage());
         }
     }
-
+    @Override
     public String getNameById(Integer clientId){
         String sqlQuery = "SELECT Name FROM Clients WHERE ID=?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
@@ -42,7 +41,7 @@ public class ClientsDAOMysql {
         }
         return null;
     }
-
+    @Override
     public void removeClientById(Integer clientId){
         String sqlQuery = "DELETE FROM Clients WHERE id = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
@@ -53,7 +52,7 @@ public class ClientsDAOMysql {
             errorManager(e.getMessage());
         }
     }
-
+    @Override
     public Client getClientObjById(Integer clientId){
         String sqlQuery = "SELECT * FROM Clients WHERE ID=?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){

@@ -4,13 +4,13 @@ import java.time.*;
 public class Loan {
     private final LocalDate loanStart;
     private final LocalDate loanEnd;
-    private final String clientId;
+    private final Integer clientId;
     private final String bookISBN;
     private final Integer id;
     private boolean active;
     private boolean emailed;
 
-    public Loan(Integer id, LocalDate loanStart, LocalDate loanEnd, String clientId, String bookISBN, boolean active, boolean emailed){
+    public Loan(Integer id, LocalDate loanStart, LocalDate loanEnd, Integer clientId, String bookISBN, boolean active, boolean emailed){
         this.loanStart = loanStart;
         this.loanEnd = loanEnd;
         this.clientId = clientId;
@@ -25,7 +25,7 @@ public class Loan {
         return bookISBN;
     }
 
-    public String getClientId() {
+    public Integer getClientId() {
         return clientId;
     }
 
@@ -37,7 +37,7 @@ public class Loan {
         return loanStart;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
