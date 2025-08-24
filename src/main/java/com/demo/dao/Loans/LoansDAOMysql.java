@@ -48,12 +48,31 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public void deactivateLoan(Integer loanId) {
-
+        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ID = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setInt(1, loanId);
+            int affectedRows = preparedStatement.executeUpdate();
+            System.out.println(affectedRows + " rows affected");
+        } catch (SQLException e) {
+            errorManager(e.getMessage());
+        }
     }
 
     @Override
-    public void getExpiredLoansClientById(Integer clientId) {
-
+    public HashMap<Integer, Loan> getExpiredLoansOfClientById(Integer clientId) {
+        HashMap<Integer, Loan> expiredLoans = new HashMap<>();
+        String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ? AND LoanEnd < ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setInt(1, clientId);
+            preparedStatement.setDate(2, Date.valueOf(LocalDate.now()));
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()){
+                expiredLoans.put(rs.getObject("Id", Integer.class), new Loan(rs.getInt("Id"), rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), rs.getObject("ClientId", Integer.class), rs.getString("BookISBN"), rs.getBoolean("Active"), rs.getBoolean("Emailed")));
+            }
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+        }
+        return expiredLoans;
     }
 
     @Override
