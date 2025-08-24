@@ -7,8 +7,7 @@ import java.util.HashMap;
 
 public interface ClientsDAO {
     void addClient(Client client);
-    String getNameByID(Integer clientId);
+    String getNameById(Integer clientId);
     void removeClientById(Integer clientId);
-    HashMap<Integer, Loan> getActiveLoansOfClientByClientId(Integer clientId);
-    HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId);
+    Client getClientObjById(Integer clientId);
 }
