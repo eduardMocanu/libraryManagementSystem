@@ -1,5 +1,6 @@
 package com.demo.dao.Loans;
 
+import com.demo.dao.Logs.LogsDAOMysql;
 import com.demo.dbConnection.DbConnection;
 import com.demo.dbConnection.MysqlDbConnection;
 import com.demo.model.Loan;
@@ -11,9 +12,11 @@ import java.util.function.Function;
 
 public class LoansDAOMysql implements LoansDAO{
     private final Connection conn;
+    private final LogsDAOMysql logsMysql;
 
     public LoansDAOMysql(){
         this.conn = MysqlDbConnection.getInstance().getConnection();
+        this.logsMysql = new LogsDAOMysql();
     }
 
     @Override
@@ -77,14 +80,14 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public String getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId) {
+    public Integer getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId) {
         String sqlQuery = "SELECT Id FROM Loans WHERE BookISBN = ? AND ClientId = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, bookISBN);
             preparedStatement.setInt(2, clientId);
             ResultSet rs = preparedStatement.executeQuery();
             if(rs.next()){
-                return rs.getString("Id");
+                return rs.getObject("Id", Integer.class);
             }
         }catch(SQLException e){
             errorManager(e.getMessage());
@@ -128,7 +131,7 @@ public class LoansDAOMysql implements LoansDAO{
         }
         return activeLoans;
     }
-    //this basically overwrites the apply method that is in Function interface
+    // This is a reusable lambda for mapping ResultSet → Loan
     Function<ResultSet, Loan> readToLoan = resultSet ->{
         Loan returnValue = null;
         try{
@@ -147,5 +150,7 @@ public class LoansDAOMysql implements LoansDAO{
 
     private void errorManager(String value){
         System.out.println(value + " error occurred");
+        logsMysql.writeLog("Loans: " + value);
+        throw new RuntimeException("Database problem Loans DAO");
     }
 }

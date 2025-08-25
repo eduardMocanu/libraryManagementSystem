@@ -1,5 +1,6 @@
 package com.demo.dao.Clients;
 
+import com.demo.dao.Logs.LogsDAOMysql;
 import com.demo.dbConnection.MysqlDbConnection;
 import com.demo.model.Client;
 
@@ -11,9 +12,11 @@ import java.sql.SQLException;
 public class ClientsDAOMysql implements ClientsDAO{
 
     private final Connection conn;
+    private final LogsDAOMysql logsMysql;
 
     public ClientsDAOMysql(){
         this.conn = MysqlDbConnection.getInstance().getConnection();
+        this.logsMysql = new LogsDAOMysql();
     }
     @Override
     public void addClient(Client client){
@@ -69,5 +72,7 @@ public class ClientsDAOMysql implements ClientsDAO{
 
     private void errorManager(String value){
         System.out.println(value + " error occurred");
+        logsMysql.writeLog("Clients: " + value);
+        throw new RuntimeException("Database problem Clients DAO");
     }
 }

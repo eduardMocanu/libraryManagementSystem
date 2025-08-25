@@ -9,7 +9,7 @@ public interface LoansDAO {
     HashMap<Integer, Loan> getExpiredLoans();
     void deactivateLoan(Integer loanId);
     HashMap<Integer, Loan> getExpiredLoansOfClientById(Integer clientId);
-    String getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);
+    Integer getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);
     HashMap<Integer, Loan> getActiveLoansOfClientByClientId(Integer clientId);
     HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId);
 }

@@ -1,5 +1,6 @@
 package com.demo.dao.Books;
 
+import com.demo.dao.Logs.LogsDAOMysql;
 import com.demo.dbConnection.MysqlDbConnection;
 import com.demo.model.Book;
 
@@ -9,9 +10,11 @@ import java.util.HashMap;
 
 public class BooksDAOMysql implements BooksDAO{
     private final Connection conn;
+    private final LogsDAOMysql logsMysql;
 
     public BooksDAOMysql(){
         this.conn = MysqlDbConnection.getInstance().getConnection();
+        this.logsMysql = new LogsDAOMysql();
     }
 
     @Override
@@ -105,5 +108,7 @@ public class BooksDAOMysql implements BooksDAO{
 
     private void errorManager(String value){
         System.out.println(value + " error occurred");
+        logsMysql.writeLog("Books: " + value);
+        throw new RuntimeException("Database problem Books DAO");
     }
 }
