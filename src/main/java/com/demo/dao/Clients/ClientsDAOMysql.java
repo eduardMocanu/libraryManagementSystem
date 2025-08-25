@@ -29,7 +29,7 @@ public class ClientsDAOMysql implements ClientsDAO{
     }
     @Override
     public String getNameById(Integer clientId){
-        String sqlQuery = "SELECT Name FROM Clients WHERE ID=?;";
+        String sqlQuery = "SELECT Name FROM Clients WHERE Id=?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             ResultSet rs = preparedStatement.executeQuery();
@@ -54,12 +54,12 @@ public class ClientsDAOMysql implements ClientsDAO{
     }
     @Override
     public Client getClientObjById(Integer clientId){
-        String sqlQuery = "SELECT * FROM Clients WHERE ID=?;";
+        String sqlQuery = "SELECT * FROM Clients WHERE Id=?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             ResultSet rs = preparedStatement.executeQuery();
             if(rs.next()){
-                return new Client(rs.getInt("ID"), rs.getString("Name"), rs.getString("Email"));
+                return new Client(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"));
             }
         }catch(SQLException e){
             errorManager(e.getMessage());

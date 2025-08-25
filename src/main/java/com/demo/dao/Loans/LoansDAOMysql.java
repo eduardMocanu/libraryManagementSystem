@@ -7,6 +7,7 @@ import com.demo.model.Loan;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.function.Function;
 
 public class LoansDAOMysql implements LoansDAO{
     private final Connection conn;
@@ -48,7 +49,7 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public void deactivateLoan(Integer loanId) {
-        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ID = ?;";
+        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE Id = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, loanId);
             int affectedRows = preparedStatement.executeUpdate();
@@ -77,18 +78,72 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public String getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId) {
-        return "";
+        String sqlQuery = "SELECT Id FROM Loans WHERE BookISBN = ? AND ClientId = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setString(1, bookISBN);
+            preparedStatement.setInt(2, clientId);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()){
+                return rs.getString("Id");
+            }
+        }catch(SQLException e){
+            errorManager(e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public HashMap<Integer, Loan> getActiveLoansOfClientByClientId(Integer clientId) {
-        return null;
+        HashMap<Integer, Loan> activeLoans = new HashMap<>();
+        String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ? AND Active = TRUE;";
+
+        try (PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)) {
+            preparedStatement.setInt(1, clientId);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                activeLoans.put(rs.getObject("Id", Integer.class), readToLoan.apply(rs));
+            }
+        } catch (SQLException e) {
+            errorManager(e.getMessage());
+        }
+
+        return activeLoans;
     }
 
     @Override
     public HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId) {
-        return null;
+        HashMap<Integer, Loan> activeLoans = new HashMap<>();
+        String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ?";
+
+        try (PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)) {
+            preparedStatement.setInt(1, clientId);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                activeLoans.put(rs.getObject("Id", Integer.class), readToLoan.apply(rs));
+            }
+        } catch (SQLException e) {
+            errorManager(e.getMessage());
+        }
+        return activeLoans;
     }
+    //this basically overwrites the apply method that is in Function interface
+    Function<ResultSet, Loan> readToLoan = resultSet ->{
+        Loan returnValue = null;
+        try{
+            returnValue = new Loan(resultSet.getObject("Id", Integer.class),
+                    resultSet.getDate("LoanStart").toLocalDate(),
+                    resultSet.getDate("LoanEnd").toLocalDate(),
+                    resultSet.getObject("ClientId", Integer.class),
+                    resultSet.getString("BookISBN"),
+                    resultSet.getBoolean("Active"),
+                    resultSet.getBoolean("Emailed"));
+        }catch(SQLException e){
+            throw new RuntimeException("Error mapping loan", e);
+        }
+        return returnValue;
+    };
 
     private void errorManager(String value){
         System.out.println(value + " error occurred");
