@@ -10,4 +10,5 @@ public interface ClientsDAO {
     String getNameById(Integer clientId);
     void removeClientById(Integer clientId);
     Client getClientObjById(Integer clientId);
+    String getEmailById(Integer clientId);
 }

@@ -27,7 +27,11 @@ public class BooksDAOMysql implements BooksDAO{
             preparedStatement.setInt(4, book.getNumberPages());
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) affected");
+            System.out.println("Successfully inserted " + book.getName());
         } catch (SQLException e) {
+            if(e.getErrorCode() == 1062){
+                System.out.println("Attempted to insert an ISBN that already exists");
+            }
             errorManager(e.getMessage());
         }
     }
@@ -109,6 +113,6 @@ public class BooksDAOMysql implements BooksDAO{
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Books: " + value);
-        throw new RuntimeException("Database problem Books DAO");
+        throw new RuntimeException("Database problem Books DAO " + value);
     }
 }

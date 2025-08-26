@@ -26,7 +26,11 @@ public class ClientsDAOMysql implements ClientsDAO{
             preparedStatement.setString(2, client.getEmail());
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " rows affected");
+            System.out.println("Successfully added the client with name:" + client.getName());
         }catch(SQLException e){
+            if(e.getErrorCode() == 1062){
+                System.out.println("Attempted to insert an email that already exists");
+            }
             errorManager(e.getMessage());
         }
     }
@@ -70,9 +74,11 @@ public class ClientsDAOMysql implements ClientsDAO{
         return null;
     }
 
+
+
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Clients: " + value);
-        throw new RuntimeException("Database problem Clients DAO");
+        throw new RuntimeException("Database problem Clients DAO " + value);
     }
 }

@@ -1,60 +1,46 @@
 package com.demo.controller;
 
+import com.demo.dao.Books.BooksDAOMysql;
+import com.demo.dao.Clients.ClientsDAOMysql;
+import com.demo.dao.Loans.LoansDAOMysql;
 import com.demo.model.Book;
 import com.demo.model.Client;
 import com.demo.model.Loan;
 import com.demo.service.EmailService;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public abstract class LoanController {
 
-    public static void addLoan(Map<String, Book> books, Map<String, Loan> loans, Loan loan){
-        Set<String> booksISBNExpired = checkExpiredLoansClient(loans, loan.getClientId());
-        if(!booksISBNExpired.isEmpty()){
-            for(String i:booksISBNExpired){
-                System.out.println("Can't loan a book because you have an expired loan already for the book " + books.get(i).getName());
-            }
-        }
-        else if(loan.getBookISBN().isEmpty()){
-            System.out.println("The ISBN is not found");}
-        else if(loans.containsKey(loan.getId())){
-            System.out.println("Can't add the loan, the id is already added");
-        }
-        else if(books.get(loan.getBookISBN()).getStatusLoaned()){
-            System.out.println("The book you want to loan is already loaned");
-        }
-        else{
-            loans.put(loan.getId(), loan);
-            System.out.println("The loan was successfully added to the database with the id " + loan.getId());
-            books.get(loan.getBookISBN()).setStatusLoaned(true);
-        }
+    private static LoansDAOMysql loanSql = new LoansDAOMysql();
+    private static ClientsDAOMysql clientSql = new ClientsDAOMysql();
+    private static BooksDAOMysql booksSql = new BooksDAOMysql();
+    public static void addLoan(Loan loan){
+        loanSql.addLoan(loan);
     }
 
-    public static void checkAllLoansSendEmail(Map<String, Loan> loans, Map<String, Client> clients, Map<String, Book> books){
-        LocalDate currentDate = LocalDate.now();
-        boolean ok = true;
-        for(Loan i: loans.values()){
-            if(currentDate.isAfter(i.getLoanEnd()) && i.getActive()){
-                if(!i.getEmailed()){
-                    EmailService.sendEmailTo(clients.get(i.getClientId()).getEmail(), books.get(i.getBookISBN()).getName(), books.get(i.getBookISBN()).getAuthor(), clients.get(i.getClientId()).getName(), String.valueOf(i.getLoanEnd()));
-                    i.setEmailed(true);
-                    System.out.println("Email sent to " + clients.get(i.getClientId()).getName());
-                }else{
-                    System.out.println(clients.get(i.getClientId()).getFullName() + " has a loan that expired but was emailed already.");
+    public static void checkAllLoansSendEmail(){
+        HashMap<Integer, Loan> expiredLoans = loanSql.getExpiredLoans();
+        for(Loan i : expiredLoans.values()){
+            Client client = clientSql.getClientObjById(i.getClientId());
+            String bookName = booksSql.getNameByISBN(i.getBookISBN());
+            if(!i.getEmailed()){
+                if(client != null && bookName != null){
+                    EmailService.sendEmailTo(client.getEmail(), bookName, client.getName(), String.valueOf(i.getLoanEnd()));
+                    System.out.println("Email sent to " + client.getName() +" for book: " + bookName);
                 }
-                ok = false;
             }
-        }
-        if(ok){
-            System.out.println("All loans are OK");
+            else{
+                System.out.println("The client " + client.getName() + " was already emailed for the loan of book " + bookName);
+            }
         }
     }
 
-    public static void deactivateLoan(Map<String, Loan> loans, Map<String, Book> books, String id){
+    public static void deactivateLoan(){
         if(loans.containsKey(id) && loans.get(id).getActive()){
             String bookISBN = loans.get(id).getBookISBN();
             books.get(bookISBN).setStatusLoaned(false);
@@ -69,7 +55,7 @@ public abstract class LoanController {
         }
     }
 
-    public static String getNewLoanId(Map<String, Loan> loans){
+    public static String getNewLoanId(){
         int maximum = 0;
         for(String i:loans.keySet()){
             maximum = Math.max(maximum, Integer.parseInt(i));
@@ -77,7 +63,7 @@ public abstract class LoanController {
         return String.valueOf(maximum+1);
     }
 
-    public static Set<String> checkExpiredLoansClient(Map<String, Loan> loans, String clientId){
+    public static Set<String> checkExpiredLoansClient(){
         Set<String> returnValues = new HashSet<>();
         for(Loan i:loans.values()){
             if(i.getClientId().equals(clientId) && i.getActive() && i.getLoanEnd().isAfter(LocalDate.now())){
@@ -87,7 +73,7 @@ public abstract class LoanController {
         return returnValues;
     }
 
-    public static void giveBookBack(Map<String, Loan> loans, Map<String, Client> clients, Map<String, Book> books, String bookISBN, String clientID){
+    public static void giveBookBack(String bookISBN, String clientID){
         if(!books.containsKey(bookISBN)){
             System.out.println("The given book is not in the database.");
         } else if (!books.get(bookISBN).getStatusLoaned()) {
@@ -111,12 +97,36 @@ public abstract class LoanController {
         }
     }
 
-    public static void removeInvalidDatesLoans(Map<String, Loan> loans, Map<String, Book> books){
+    public static void removeInvalidDatesLoans(){
         for(Loan i : loans.values()){
             if(i.getLoanStart().isAfter(i.getLoanEnd()) && i.getActive()){
                 deactivateLoan(loans, books, i.getId());
                 System.out.println("Loan " + i.getId() + " was set as inactive because of invalid dates");
             }
+        }
+    }
+
+    public static HashSet<Loan> getActiveLoansOfClient(String clientId){
+        HashSet<Loan> returnValue = new HashSet<>();
+        for (Loan i : loans.values()) {
+            if (i.getClientId().equals(clientId) && i.getActive()) {
+                returnValue.add(i);
+            }
+        }
+        return returnValue;
+    }
+
+    public static void getHistoryOfClient(String clientId){
+        boolean ok = false;
+        for(Loan i:loans.values()){
+            if(i.getClientId().equals(clientId)){
+                ok = true;
+                String active = i.getActive() ? "active" : "not active";
+                System.out.println("Loan with id " + i.getId() + " is for book " + books.get(i.getBookISBN()).getName() + " and is " + active);
+            }
+        }
+        if(!ok){
+            System.out.println("You haven't loaned anything, ever");
         }
     }
 }

@@ -42,7 +42,7 @@ public class LoansDAOMysql implements LoansDAO{
             preparedStatement.setDate(1, Date.valueOf(LocalDate.now()));
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                expiredLoans.put(rs.getObject("Id", Integer.class), new Loan(rs.getInt("Id"), rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), rs.getObject("ClientId", Integer.class), rs.getString("BookISBN"), rs.getBoolean("Active"), rs.getBoolean("Emailed")));
+                expiredLoans.put(rs.getObject("Id", Integer.class), new Loan(rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), rs.getObject("ClientId", Integer.class), rs.getString("BookISBN"), rs.getBoolean("Active"), rs.getBoolean("Emailed")));
             }
         }catch(SQLException e){
             errorManager(e.getMessage());
@@ -71,7 +71,7 @@ public class LoansDAOMysql implements LoansDAO{
             preparedStatement.setDate(2, Date.valueOf(LocalDate.now()));
             ResultSet rs = preparedStatement.executeQuery();
             while(rs.next()){
-                expiredLoans.put(rs.getObject("Id", Integer.class), new Loan(rs.getInt("Id"), rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), rs.getObject("ClientId", Integer.class), rs.getString("BookISBN"), rs.getBoolean("Active"), rs.getBoolean("Emailed")));
+                expiredLoans.put(rs.getObject("Id", Integer.class), new Loan(rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), rs.getObject("ClientId", Integer.class), rs.getString("BookISBN"), rs.getBoolean("Active"), rs.getBoolean("Emailed")));
             }
         }catch (SQLException e){
             errorManager(e.getMessage());
@@ -135,7 +135,7 @@ public class LoansDAOMysql implements LoansDAO{
     Function<ResultSet, Loan> readToLoan = resultSet ->{
         Loan returnValue = null;
         try{
-            returnValue = new Loan(resultSet.getObject("Id", Integer.class),
+            returnValue = new Loan(
                     resultSet.getDate("LoanStart").toLocalDate(),
                     resultSet.getDate("LoanEnd").toLocalDate(),
                     resultSet.getObject("ClientId", Integer.class),
@@ -151,6 +151,6 @@ public class LoansDAOMysql implements LoansDAO{
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Loans: " + value);
-        throw new RuntimeException("Database problem Loans DAO");
+        throw new RuntimeException("Database problem Loans DAO " + value);
     }
 }
