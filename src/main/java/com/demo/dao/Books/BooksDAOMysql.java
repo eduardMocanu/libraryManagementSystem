@@ -18,7 +18,7 @@ public class BooksDAOMysql implements BooksDAO{
     }
 
     @Override
-    public void addBook(Book book) {
+    public boolean addBook(Book book) {
         String sqlQuery = "INSERT INTO Books (ISBN, Name, Author, NumberPages) VALUES (?, ?, ?, ?)";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, book.getISBN());
@@ -27,12 +27,13 @@ public class BooksDAOMysql implements BooksDAO{
             preparedStatement.setInt(4, book.getNumberPages());
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " row(s) affected");
-            System.out.println("Successfully inserted " + book.getName());
+            return true;
         } catch (SQLException e) {
             if(e.getErrorCode() == 1062){
                 System.out.println("Attempted to insert an ISBN that already exists");
             }
             errorManager(e.getMessage());
+            return false;
         }
     }
 
@@ -109,6 +110,44 @@ public class BooksDAOMysql implements BooksDAO{
         }
         return availableBooksByAuthors;
     }
+
+    @Override
+    public boolean loanBook(String bookISBN) {
+        String sqlQuery = "UPDATE Books SET statusLoaned = 1 WHERE bookISBN = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setString(1, bookISBN);
+            int affectedRows = preparedStatement.executeUpdate();
+            if(affectedRows == 1){
+                return true;
+            }
+            return false;
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean giveBookBack(String booksISBN) {
+        String sqlQuery = "UPDATE Books SET StatusLoaned = 0 WHERE BookISBN = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setString(1, booksISBN);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if(rowsAffected == 1){
+                return true;
+            }
+            return false;
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean getStatusLoanedBook(String bookISBN) {
+        return false;
+    }
+
 
     private void errorManager(String value){
         System.out.println(value + " error occurred");

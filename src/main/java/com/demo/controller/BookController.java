@@ -13,11 +13,12 @@ public abstract class BookController {
 
     private static BooksDAO booksSql = new BooksDAOMysql();
 
-    public static void addBook(Book book){
-        booksSql.addBook(book);
+    public static boolean addBook(Book book){
+        return booksSql.addBook(book);
     }
 
-    public static void removeBook(String bookISBN){
+    public static boolean removeBook(String bookISBN){
+        //check if book is loaned
         booksSql.removeBookByISBN(bookISBN);
     }
 

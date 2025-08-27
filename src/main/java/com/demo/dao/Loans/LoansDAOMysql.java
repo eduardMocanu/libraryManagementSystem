@@ -151,6 +151,7 @@ public class LoansDAOMysql implements LoansDAO{
         }catch (SQLException e){
             errorManager(e.getMessage());
         }
+        //set status not loaned in books as well
     }
 
     @Override
@@ -168,6 +169,8 @@ public class LoansDAOMysql implements LoansDAO{
         }
         return null;
     }
+
+
 
     // This is a reusable lambda for mapping ResultSet → Loan
     Function<ResultSet, Loan> readToLoan = resultSet ->{

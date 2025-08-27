@@ -20,7 +20,14 @@ public abstract class LoanController {
     private static BooksDAO booksSql = new BooksDAOMysql();
 
     public static boolean addLoan(Loan loan) {
-        return loanSql.addLoan(loan);
+        boolean ok = booksSql.loanBook(loan.getBookISBN());
+        if(ok){
+            boolean addedLoan = loanSql.addLoan(loan);
+            if(!addedLoan){
+                booksSql.giveBookBack(loan.getBookISBN());
+            }
+        }
+        return false;
     }
 
     public static void checkAllLoansSendEmail() {
@@ -57,7 +64,7 @@ public abstract class LoanController {
     }
 
     public static HashMap<Integer, Loan> getHistoryOfClient(Integer clientId) {
-        return loanSql.getHistoryOfClientByClientId(clientId)
+        return loanSql.getHistoryOfClientByClientId(clientId);
     }
 
     public static Loan getALoanData(String bookName, String bookAuthor, Integer clientId){
@@ -68,4 +75,6 @@ public abstract class LoanController {
             return null;
         }
     }
+
+
 }

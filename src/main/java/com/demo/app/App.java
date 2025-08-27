@@ -178,7 +178,7 @@ public class App {
         String bookISBN;
         Integer clientId;
         int length;
-        HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooksByAuthor(books);
+        HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooksByAuthor();
         for(String i:booksAvailable.keySet()){
             ArrayList<String> titles = booksAvailable.get(i);
             System.out.println(i + ":");
@@ -195,6 +195,7 @@ public class App {
         System.out.println("Give me your id");
         clientId = Integer.getInteger(scanner.nextLine().trim());
         bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
+        //check if book is loaned or not already
         dateEnd = dateNow.plusDays(length);
         boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
         if(ok){
@@ -207,6 +208,7 @@ public class App {
         System.out.println("Give me the id of the loan you want to deactivate");
         loanId = scanner.nextInt();
         boolean ok = LoanController.deactivateLoan(loanId);
+        //make the book that is in the loan not loaned anymore
         if(ok){
             System.out.println("Loan deactivated successfully");
         }
@@ -241,13 +243,13 @@ public class App {
         Integer id;
         System.out.println("Give me the id of the client:");
         id = scanner.nextInt();
+        //check if client has loaned books at the moment of the removal
         boolean ok = ClientController.removeClient(id);
         if(ok){
             System.out.println("The deletion was a success");
         }
 
     }
-//here left
     static void addBook(Scanner scanner){
         String ISBN, bookName, author;
         int pages;
@@ -258,16 +260,21 @@ public class App {
         System.out.println("Give me the author");
         author = scanner.nextLine().trim().toUpperCase();
         pages = readInt(scanner, "Give me the number of pages that the book has:");
-        BookController.addBook(books, new Book(ISBN, bookName, author, pages, false));
-
+        boolean ok = BookController.addBook(new Book(ISBN, bookName, author, pages, false));
+        if(ok){
+            System.out.println("Book added successfully");
+        }
     }
 
     static void removeBook(Scanner scanner){
-        String bookName, ISBN;
+        //check if book is loaned at the moment of the removal
+        String bookName, ISBN, authorName;
         System.out.println("Give me the name of the book you want to remove:");
         bookName = scanner.nextLine().toUpperCase().trim();
-        ISBN = BookController.getBookISBNByName(scanner, books, bookName);
-        BookController.removeBook(books, ISBN);
+        System.out.println("Give me the author of the book you want to remove:");
+        authorName = scanner.nextLine().trim().toUpperCase();
+        ISBN = BookController.getBookISBNByNameAndAuthor(bookName, authorName);
+        BookController.removeBook(ISBN);
         //books
 
     }
@@ -292,6 +299,7 @@ public class App {
     }
 
     static void giveBackLoanedBook(Scanner scanner){
+        //change the status of the loan and of the book that was loaned
         String bookName, bookISBN, clientID;
         System.out.println("Give me the name of the book you want to give back:");
         bookName = scanner.nextLine().trim().toUpperCase();
