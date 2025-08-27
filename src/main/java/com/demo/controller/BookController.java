@@ -1,5 +1,6 @@
 package com.demo.controller;
 
+import com.demo.dao.Books.BooksDAO;
 import com.demo.dao.Books.BooksDAOMysql;
 import com.demo.model.Book;
 
@@ -10,7 +11,7 @@ import java.util.Scanner;
 
 public abstract class BookController {
 
-    private static BooksDAOMysql booksSql = new BooksDAOMysql();
+    private static BooksDAO booksSql = new BooksDAOMysql();
 
     public static void addBook(Book book){
         booksSql.addBook(book);

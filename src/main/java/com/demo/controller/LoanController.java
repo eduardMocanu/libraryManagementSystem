@@ -1,25 +1,23 @@
 package com.demo.controller;
 
+import com.demo.dao.Books.BooksDAO;
 import com.demo.dao.Books.BooksDAOMysql;
+import com.demo.dao.Clients.ClientsDAO;
 import com.demo.dao.Clients.ClientsDAOMysql;
+import com.demo.dao.Loans.LoansDAO;
 import com.demo.dao.Loans.LoansDAOMysql;
-import com.demo.model.Book;
 import com.demo.model.Client;
 import com.demo.model.Loan;
 import com.demo.service.EmailService;
 
-import java.net.Inet4Address;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public abstract class LoanController {
 
-    private static LoansDAOMysql loanSql = new LoansDAOMysql();
-    private static ClientsDAOMysql clientSql = new ClientsDAOMysql();
-    private static BooksDAOMysql booksSql = new BooksDAOMysql();
+    private static LoansDAO loanSql = new LoansDAOMysql();
+    private static ClientsDAO clientSql = new ClientsDAOMysql();
+    private static BooksDAO booksSql = new BooksDAOMysql();
 
     public static void addLoan(Loan loan) {
         loanSql.addLoan(loan);
