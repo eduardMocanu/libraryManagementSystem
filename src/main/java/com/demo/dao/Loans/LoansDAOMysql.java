@@ -8,6 +8,7 @@ import com.demo.model.Loan;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.function.Function;
 
 public class LoansDAOMysql implements LoansDAO{
@@ -96,8 +97,8 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public HashMap<Integer, Loan> getActiveLoansOfClientByClientId(Integer clientId) {
-        HashMap<Integer, Loan> activeLoans = new HashMap<>();
+    public HashSet<Loan> getActiveLoansOfClientByClientId(Integer clientId) {
+        HashSet<Loan> activeLoans = new HashSet<>();
         String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ? AND Active = TRUE;";
 
         try (PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)) {
@@ -105,7 +106,7 @@ public class LoansDAOMysql implements LoansDAO{
             ResultSet rs = preparedStatement.executeQuery();
 
             while (rs.next()) {
-                activeLoans.put(rs.getObject("Id", Integer.class), readToLoan.apply(rs));
+                activeLoans.add(readToLoan.apply(rs));
             }
         } catch (SQLException e) {
             errorManager(e.getMessage());
@@ -131,6 +132,24 @@ public class LoansDAOMysql implements LoansDAO{
         }
         return activeLoans;
     }
+
+    @Override
+    public void returnBook(Integer clientId, String bookISBN) {
+        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ClientId = ? AND BookISBN = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setInt(1, clientId);
+            preparedStatement.setString(2, bookISBN);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if(rowsAffected == 0){
+                System.out.println("No loan with this data");
+            }else{
+                System.out.println("Loan updated successfully");
+            }
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+        }
+    }
+
     // This is a reusable lambda for mapping ResultSet → Loan
     Function<ResultSet, Loan> readToLoan = resultSet ->{
         Loan returnValue = null;
