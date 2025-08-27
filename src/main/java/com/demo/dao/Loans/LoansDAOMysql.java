@@ -1,7 +1,6 @@
 package com.demo.dao.Loans;
 
 import com.demo.dao.Logs.LogsDAOMysql;
-import com.demo.dbConnection.DbConnection;
 import com.demo.dbConnection.MysqlDbConnection;
 import com.demo.model.Loan;
 
@@ -21,7 +20,7 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public void addLoan(Loan loan) {
+    public boolean addLoan(Loan loan) {
         String sqlQuery = "INSERT INTO Loans (LoanStart, LoanEnd, ClientId, BookISBN) VALUES (?, ?, ?, ?);";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setDate(1, Date.valueOf(loan.getLoanStart()));
@@ -30,8 +29,10 @@ public class LoansDAOMysql implements LoansDAO{
             preparedStatement.setString(4, loan.getBookISBN());
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " rows affected");
+            return true;
         }catch(SQLException e){
             errorManager(e.getMessage());
+            return false;
         }
     }
 
@@ -52,14 +53,16 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public void deactivateLoan(Integer loanId) {
+    public boolean deactivateLoan(Integer loanId) {
         String sqlQuery = "UPDATE Loans SET Active = 0 WHERE Id = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, loanId);
             int affectedRows = preparedStatement.executeUpdate();
             System.out.println(affectedRows + " rows affected");
+            return true;
         } catch (SQLException e) {
             errorManager(e.getMessage());
+            return false;
         }
     }
 
@@ -148,6 +151,22 @@ public class LoansDAOMysql implements LoansDAO{
         }catch (SQLException e){
             errorManager(e.getMessage());
         }
+    }
+
+    @Override
+    public Loan getALoanData(String bookISBN, Integer clientId) {
+        String sqlQuery = "SELECT * FROM Loans WHERE BookISBN = ? AND ClientId = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setString(1, bookISBN);
+            preparedStatement.setInt(2, clientId);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()){
+                return new Loan(rs.getDate("LoanStart").toLocalDate(), rs.getDate("LoanEnd").toLocalDate(), clientId, bookISBN, rs.getBoolean("Active"), rs.getBoolean("Emailed"));
+            }
+        }catch(SQLException e){
+            errorManager(e.getMessage());
+        }
+        return null;
     }
 
     // This is a reusable lambda for mapping ResultSet → Loan

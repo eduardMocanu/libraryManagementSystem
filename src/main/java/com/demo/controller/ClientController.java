@@ -8,12 +8,12 @@ public abstract class ClientController {
 
     private static ClientsDAO clientSql = new ClientsDAOMysql();
 
-    public static void addClient(Client client){
-        clientSql.addClient(client);
+    public static Integer addClient(Client client){
+        return clientSql.addClient(client);
     }
 
-    public static void removeClient(Integer id){
-        clientSql.removeClientById(id);
+    public static boolean removeClient(Integer id){
+        return clientSql.removeClientById(id);
     }
 
 

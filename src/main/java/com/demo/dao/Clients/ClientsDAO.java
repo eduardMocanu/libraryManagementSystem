@@ -6,8 +6,8 @@ import com.demo.model.Loan;
 import java.util.HashMap;
 
 public interface ClientsDAO {
-    void addClient(Client client);
+    Integer addClient(Client client);
     String getNameById(Integer clientId);
-    void removeClientById(Integer clientId);
+    boolean removeClientById(Integer clientId);
     Client getClientObjById(Integer clientId);
 }

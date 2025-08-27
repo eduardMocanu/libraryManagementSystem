@@ -19,19 +19,28 @@ public class ClientsDAOMysql implements ClientsDAO{
         this.logsMysql = new LogsDAOMysql();
     }
     @Override
-    public void addClient(Client client){
+    public Integer addClient(Client client){
         String sqlQuery = "INSERT INTO Clients (Name, Email) VALUES (?, ?);";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, client.getName());
             preparedStatement.setString(2, client.getEmail());
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " rows affected");
-            System.out.println("Successfully added the client with name:" + client.getName());
+            Integer id = null;
+            if(rowsAffected > 0){
+                try(ResultSet rs = preparedStatement.getGeneratedKeys()){
+                    if(rs.next()){
+                        id = rs.getInt(1);
+                    }
+                }
+            }
+            return id;
         }catch(SQLException e){
             if(e.getErrorCode() == 1062){
                 System.out.println("Attempted to insert an email that already exists");
             }
             errorManager(e.getMessage());
+            return null;
         }
     }
     @Override
@@ -49,14 +58,16 @@ public class ClientsDAOMysql implements ClientsDAO{
         return null;
     }
     @Override
-    public void removeClientById(Integer clientId){
+    public boolean removeClientById(Integer clientId){
         String sqlQuery = "DELETE FROM Clients WHERE id = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println(rowsAffected + " rows affected");
+            return true;
         }catch (SQLException e){
             errorManager(e.getMessage());
+            return false;
         }
     }
     @Override
@@ -66,7 +77,7 @@ public class ClientsDAOMysql implements ClientsDAO{
             preparedStatement.setInt(1, clientId);
             ResultSet rs = preparedStatement.executeQuery();
             if(rs.next()){
-                return new Client(rs.getInt("Id"), rs.getString("Name"), rs.getString("Email"));
+                return new Client(rs.getString("Name"), rs.getString("Email"));
             }
         }catch(SQLException e){
             errorManager(e.getMessage());

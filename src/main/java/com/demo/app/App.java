@@ -13,14 +13,15 @@ import com.demo.service.LogsServiceCsv;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 
+import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.*;
 
 public class App {
-    public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("data/logs.csv");
-    public static final BookServiceCsv bookServiceCsv = new BookServiceCsv("data/books.csv");
-    public static final LoanServiceCsv loanServiceCsv = new LoanServiceCsv("data/loans.csv");
-    public static final ClientServiceCsv clientServiceCsv = new ClientServiceCsv("data/clients.csv");
+//    public static final LogsServiceCsv logsServiceCsv = new LogsServiceCsv("data/logs.csv");
+//    public static final BookServiceCsv bookServiceCsv = new BookServiceCsv("data/books.csv");
+//    public static final LoanServiceCsv loanServiceCsv = new LoanServiceCsv("data/loans.csv");
+//    public static final ClientServiceCsv clientServiceCsv = new ClientServiceCsv("data/clients.csv");
 
     public static void main(String[] args){
         menuInputHandler();
@@ -47,16 +48,15 @@ public class App {
     }
 
     static void menuInputHandler(){
-        Map<String, Loan> loans;
-        Map<String, Book> books;
-        Map<String, Client> clients;
+//        Map<String, Loan> loans;
+//        Map<String, Book> books;
+//        Map<String, Client> clients;
 
         boolean run = true;
         Scanner scanner = new Scanner(System.in);
-        books = bookServiceCsv.readCSVFile();
-        loans = loanServiceCsv.readCSVFile();
-        clients = clientServiceCsv.readCSVFile();
-        LoanController.removeInvalidDatesLoans(loans, books);
+//        books = bookServiceCsv.readCSVFile();
+//        loans = loanServiceCsv.readCSVFile();
+//        clients = clientServiceCsv.readCSVFile();
         MenuOptions menuOption;
 
         while(run){
@@ -65,41 +65,41 @@ public class App {
 
             switch (menuOption){
                 case CHECK_ALL_LOANS -> {
-                    checkAllLoansIfEnding(loans, clients, books);
+                    checkAllLoansIfEnding();
                 }
                 case CHECK_A_LOAN ->{
-                    checkALoanData(scanner, loans, clients, books);
+                    checkALoanData(scanner,);
                 }
                 case ADD_LOAN -> {
-                    addLoan(scanner, loans, books);
+                    addLoan(scanner);
                 }
                 case DEACTIVATE_LOAN -> {
-                    deactivateLoanTechnicalProblem(scanner, books, loans);
+                    deactivateLoanTechnicalProblem(scanner);
                 }
                 case ADD_CLIENT -> {
-                    addClient(scanner, clients);
+                    addClient(scanner);
                 }
                 case REMOVE_CLIENT -> {
-                    removeClient(scanner, clients, loans);
+                    removeClient(scanner);
                 }
                 case ADD_BOOK -> {
-                    addBook(scanner, books);
+                    addBook(scanner);
                 }
                 case REMOVE_BOOK -> {
-                    removeBook(scanner, books);
+                    removeBook(scanner);
                 }
                 case CHECK_ACTIVE_LOANS_CLIENT -> {
-                    checkActiveLoansClient(scanner, loans, books, clients);
+                    checkActiveLoansClient(scanner);
                 }
                 case GIVE_BACK_LOANED_BOOK -> {
-                    giveBackLoanedBook(scanner, loans, books, clients);
+                    giveBackLoanedBook(scanner);
                 }
                 case CHECK_HISTORY_OF_CLIENT -> {
-                    checkHistoryOfClient(scanner, loans, books, clients);
+                    checkHistoryOfClient(scanner);
                 }
                 case EXIT ->{
                     run = false;
-                    exit(books, clients, loans);
+                    exit();
                 }
                 case null -> {
                     System.out.println("Invalid option");
@@ -143,35 +143,42 @@ public class App {
 
 
     //menu behaviour
-    static void checkAllLoansIfEnding(Map<String, Loan> loans, Map<String, Client>clients, Map<String, Book> books){
-        LoanController.checkAllLoansSendEmail(loans, clients, books);
-        loanServiceCsv.writeCSVFile(loans);
-        logsServiceCsv.writeToLogsCsv("All loans have been checked");
+    static void checkAllLoansIfEnding(){
+        LoanController.checkAllLoansSendEmail();
     }
 
-    static void checkALoanData(Scanner scanner, Map<String, Loan> loans, Map<String, Client> clients, Map<String, Book> books){
-        System.out.println("Give me the id of the loan you want to check");
-        String loanId = scanner.nextLine().trim();
-        if(loans.containsKey(loanId) && loans.get(loanId).getActive()){
-            Loan loan = loans.get(loanId);
-            System.out.println("Loaned the book with the title: " + books.get(loan.getBookISBN()).getName());
-            System.out.println("The loan started at " + loan.getLoanStart() + " and ends at " + loan.getLoanEnd());
-            System.out.println("The person that loaned it is: " + clients.get(loan.getClientId().trim()).getFullName());
-        }else if(loans.containsKey(loanId) && !loans.get(loanId).getActive()){
-            System.out.println("Loan is not active anymore");
-        }else{
-            System.out.println("Loan doesn't exist");
+    static void checkALoanData(Scanner scanner){
+        System.out.println("Give me your client Id:");
+        Integer clientId = scanner.nextInt();
+        System.out.println("Give me the name of the book you have loaned:");
+        String bookName = scanner.nextLine().trim().toUpperCase();
+        System.out.println("Give me the author of the book you have loaned:");
+        String bookAuthor = scanner.nextLine().trim().toUpperCase();
+        Loan loanData = LoanController.getALoanData(bookName, bookAuthor, clientId);
+        if(loanData != null){
+            if(loanData.getActive()){
+                if(loanData.getLoanEnd().isAfter(LocalDate.now())){
+                    System.out.println("The loan has not expired yet, is available until: " + loanData.getLoanEnd());
+                }else{
+                    System.out.println("Loan has expired on "+ loanData.getLoanEnd());
+                    if(loanData.getEmailed()){
+                        System.out.println("You have been emailed about this");
+                    }
+                }
+            }
+            else{
+                System.out.println("Loan is inactive");
+            }
         }
-        logsServiceCsv.writeToLogsCsv("Checked the loan data of loan with id " +loanId);
     }
 
-    static void addLoan(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books){
+    static void addLoan(Scanner scanner){
         LocalDate dateNow = LocalDate.now();
         LocalDate dateEnd;
-        String bookISBN, clientId;
-        String idLoan = LoanController.getNewLoanId(loans), bookName;
+        String bookISBN;
+        Integer clientId;
         int length;
-        HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooks(books);
+        HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooksByAuthor(books);
         for(String i:booksAvailable.keySet()){
             ArrayList<String> titles = booksAvailable.get(i);
             System.out.println(i + ":");
@@ -180,43 +187,36 @@ public class App {
             }
         }
         System.out.println("Give me the book name");
-        bookName = scanner.nextLine().toUpperCase().trim();
+        String bookName = scanner.nextLine().toUpperCase().trim();
+        System.out.println("Give me the book author");
+        String bookAuthor = scanner.nextLine().trim().toUpperCase();
         length = readInt(scanner, "Give me the length of the loan");
-        while (length <= 0) {
-            System.out.println("Give me a valid timespan");
-            length = scanner.nextInt();
-        }
         scanner.nextLine();//to empty the buffer from the int
         System.out.println("Give me your id");
-        clientId = scanner.nextLine().trim();
-        bookISBN = BookController.getBookISBNByName(scanner, books, bookName);
+        clientId = Integer.getInteger(scanner.nextLine().trim());
+        bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
         dateEnd = dateNow.plusDays(length);
-        LoanController.addLoan(books, loans, new Loan(idLoan, dateNow, dateEnd, clientId, bookISBN, true, false));
-        //books+loans
-        bookServiceCsv.writeCSVFile(books);
-        loanServiceCsv.writeCSVFile(loans);
-        logsServiceCsv.writeToLogsCsv("Opted to add loan with loan ID: " + idLoan);
+        boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
+        if(ok){
+            System.out.println("Loan added successfully");
+        }
     }
 
-    static void deactivateLoanTechnicalProblem(Scanner scanner, Map<String, Book> books, Map<String, Loan> loans){
-        String loanId;
+    static void deactivateLoanTechnicalProblem(Scanner scanner){
+        Integer loanId;
         System.out.println("Give me the id of the loan you want to deactivate");
-        loanId = scanner.nextLine().trim();
-        LoanController.deactivateLoan(loans, books, loanId);
-        //books+loans
-        bookServiceCsv.writeCSVFile(books);
-        loanServiceCsv.writeCSVFile(loans);
-        System.out.println("Deactivated the loan with id: " + loanId);
-        logsServiceCsv.writeToLogsCsv("Opted for option to deactivate loan with loan ID: " + loanId);
-
+        loanId = scanner.nextInt();
+        boolean ok = LoanController.deactivateLoan(loanId);
+        if(ok){
+            System.out.println("Loan deactivated successfully");
+        }
     }
 
-    static void addClient(Scanner scanner, Map<String, Client> clients){
-        String name, surname, email, id = ClientController.getNewClientId(clients);
+    static void addClient(Scanner scanner){
+        String name, email;
         System.out.println("Give me the name:");
         name = scanner.nextLine().trim().toUpperCase();
         System.out.println("Give me the surname:");
-        surname = scanner.nextLine().trim().toUpperCase();
         while(true){
             try{
                 System.out.println("Give me your email:");
@@ -231,23 +231,24 @@ public class App {
                 System.out.println("Invalid address");
             }
         }
-        ClientController.addClient(clients, new Client(id, name, surname, email));
-        //clients
-        clientServiceCsv.writeCSVFile(clients);
-        logsServiceCsv.writeToLogsCsv("Opted to add client with ID: " + id);
+        Integer id = ClientController.addClient(new Client(name, email));
+        if(id != null){
+            System.out.println("Added the client with id " + id);
+        }
     }
 
-    static void removeClient(Scanner scanner, Map<String, Client> clients, Map<String, Loan> loans){
-        String id;
+    static void removeClient(Scanner scanner){
+        Integer id;
         System.out.println("Give me the id of the client:");
-        id = scanner.nextLine().trim();
-        ClientController.removeClient(clients, loans, id);
-        //clients
-        clientServiceCsv.writeCSVFile(clients);
-        logsServiceCsv.writeToLogsCsv("Opted to remove client with ID: " + id);
-    }
+        id = scanner.nextInt();
+        boolean ok = ClientController.removeClient(id);
+        if(ok){
+            System.out.println("The deletion was a success");
+        }
 
-    static void addBook(Scanner scanner, Map<String, Book> books){
+    }
+//here left
+    static void addBook(Scanner scanner){
         String ISBN, bookName, author;
         int pages;
         System.out.println("Give me the ISBN of the book:");
@@ -258,23 +259,20 @@ public class App {
         author = scanner.nextLine().trim().toUpperCase();
         pages = readInt(scanner, "Give me the number of pages that the book has:");
         BookController.addBook(books, new Book(ISBN, bookName, author, pages, false));
-        //books
-        bookServiceCsv.writeCSVFile(books);
-        logsServiceCsv.writeToLogsCsv("Opted to add a book with ISBN: " + ISBN);
+
     }
 
-    static void removeBook(Scanner scanner, Map<String, Book> books){
+    static void removeBook(Scanner scanner){
         String bookName, ISBN;
         System.out.println("Give me the name of the book you want to remove:");
         bookName = scanner.nextLine().toUpperCase().trim();
         ISBN = BookController.getBookISBNByName(scanner, books, bookName);
         BookController.removeBook(books, ISBN);
         //books
-        bookServiceCsv.writeCSVFile(books);
-        logsServiceCsv.writeToLogsCsv("Opted to remove book with ISBN: " + ISBN);
+
     }
 
-    static void checkActiveLoansClient(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients){
+    static void checkActiveLoansClient(Scanner scanner){
         String clientId;
         System.out.println("Provide me the user ID:");
         clientId = scanner.nextLine().trim();
@@ -291,10 +289,9 @@ public class App {
         }else{
             System.out.println("The client ID is not valid");
         }
-        logsServiceCsv.writeToLogsCsv("Opted to check the loans of client with ID: " + clientId);
     }
 
-    static void giveBackLoanedBook(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients){
+    static void giveBackLoanedBook(Scanner scanner){
         String bookName, bookISBN, clientID;
         System.out.println("Give me the name of the book you want to give back:");
         bookName = scanner.nextLine().trim().toUpperCase();
@@ -302,13 +299,10 @@ public class App {
         clientID = scanner.nextLine().trim();
         bookISBN = BookController.getBookISBNByName(scanner, books, bookName);
         LoanController.giveBookBack(loans, clients, books, bookISBN, clientID);
-        //write
-        bookServiceCsv.writeCSVFile(books);
-        loanServiceCsv.writeCSVFile(loans);
-        logsServiceCsv.writeToLogsCsv("Opted to give back the book with the name: " + bookName);
+
     }
 
-    static void checkHistoryOfClient(Scanner scanner, Map<String, Loan> loans, Map<String, Book> books, Map<String, Client> clients){
+    static void checkHistoryOfClient(Scanner scanner){
         String clientId;
         System.out.println("Give me the user ID:");
         clientId = scanner.nextLine().trim();
@@ -317,17 +311,13 @@ public class App {
         }else{
             System.out.println("The client is not registered");
         }
-        logsServiceCsv.writeToLogsCsv("Checked the history of client with ID:" + clientId);
     }
 
-    static void exit(Map<String, Book> books, Map<String, Client> clients, Map<String, Loan> loans){
+    static void exit(){
         System.out.println("Exiting...");
-        //all
-        bookServiceCsv.writeCSVFile(books);
-        loanServiceCsv.writeCSVFile(loans);
-        clientServiceCsv.writeCSVFile(clients);
-        logsServiceCsv.writeToLogsCsv("Exited");
+
     }
     //TO DO sql transition:
+    //Scanner - member of App class
     //dao folder - implements an interface and then an implementDaoMysqlBook class and like this for each one
 }

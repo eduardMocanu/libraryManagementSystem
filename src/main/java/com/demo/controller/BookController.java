@@ -21,7 +21,7 @@ public abstract class BookController {
         booksSql.removeBookByISBN(bookISBN);
     }
 
-    public static String getBookISBNByNameAndAuthor(Scanner scanner, String name, String author){
+    public static String getBookISBNByNameAndAuthor(String name, String author){
         return booksSql.getBookISBNByNameAndAuthor(name, author);
     }
 

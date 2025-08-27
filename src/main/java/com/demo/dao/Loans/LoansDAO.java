@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public interface LoansDAO {
-    void addLoan(Loan loan);
+    boolean addLoan(Loan loan);
     HashMap<Integer, Loan> getExpiredLoans();
-    void deactivateLoan(Integer loanId);
+    boolean deactivateLoan(Integer loanId);
     HashMap<Integer, Loan> getExpiredLoansOfClientById(Integer clientId);
     Integer getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);
     HashSet<Loan> getActiveLoansOfClientByClientId(Integer clientId);
     HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId);
     void returnBook(Integer clientId, String bookISBN);
+    Loan getALoanData(String bookISBN, Integer clientId);
 }
