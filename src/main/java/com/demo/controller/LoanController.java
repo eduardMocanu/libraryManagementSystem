@@ -25,6 +25,8 @@ public abstract class LoanController {
             boolean addedLoan = loanSql.addLoan(loan);
             if(!addedLoan){
                 booksSql.giveBookBack(loan.getBookISBN());
+            }else{
+                return true;
             }
         }
         return false;
@@ -46,8 +48,18 @@ public abstract class LoanController {
         }
     }
 
-    public static boolean deactivateLoan(Integer loanId) {
-        return loanSql.deactivateLoan(loanId);
+    public static int deactivateLoan(Integer loanId) {
+        String bookISBN = loanSql.getBookISBNOfLoan(loanId);
+        boolean ok = loanSql.deactivateLoan(loanId);
+        if(ok){
+            if(booksSql.giveBookBack(bookISBN)){
+                return 2;//operation successful
+            }else{
+                loanSql.activateLoan(loanId);
+                return 1;//could not give the book back
+            }
+        }
+        return 0; //could not deactivate loan
     }
 
     public static HashMap<Integer, Loan> checkExpiredLoansClient(Integer clientId) {

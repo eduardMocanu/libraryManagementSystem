@@ -170,6 +170,50 @@ public class LoansDAOMysql implements LoansDAO{
         return null;
     }
 
+    @Override
+    public boolean checkIfISBNIsLoaned(String bookISBN) {
+        String sqlQUery = "SELECT * FROM Loans WHERE BookISBN = ?:";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQUery)){
+            preparedStatement.setString(1, bookISBN);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(!rs.next()){
+                return false;
+            }
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+        }
+        return true;
+    }
+
+    @Override
+    public String getBookISBNOfLoan(Integer loanId) {
+        String sqlQuery = "SELECT BookISBN FROM Loans WHERE Id = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setInt(1, loanId);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()){
+                return rs.getString("BookISBN");
+            }
+        }catch(SQLException e){
+            errorManager(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public boolean activateLoan(Integer loanId) {
+        String sqlQuery = "UPDATE Loans SET Active = 1 WHERE Id = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setInt(1, loanId);
+            int rowsAffected = preparedStatement.executeUpdate();
+            if(rowsAffected == 1){
+                return true;
+            }
+        }catch (SQLException e){
+            errorManager(e.getMessage());
+        }
+        return false;
+    }
 
 
     // This is a reusable lambda for mapping ResultSet → Loan

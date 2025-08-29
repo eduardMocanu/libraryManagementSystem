@@ -56,20 +56,18 @@ public class BooksDAOMysql implements BooksDAO{
     }
 
     @Override
-    public void removeBookByISBN(String bookISBN) {
+    public boolean removeBookByISBN(String bookISBN) {
         String sqlQuery = "DELETE FROM Books WHERE ISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, bookISBN);
             int rowsAffected = preparedStatement.executeUpdate();
-            if(rowsAffected==0){
-                System.out.println("The ISBN is not in the database");
-            }
-            else{
-                System.out.println(bookISBN + " ISBN removed successfully");
+            if(rowsAffected!=0){
+                return true;
             }
         }catch(SQLException e){
             errorManager(e.getMessage());
         }
+        return false;
     }
 
     @Override
@@ -128,10 +126,10 @@ public class BooksDAOMysql implements BooksDAO{
     }
 
     @Override
-    public boolean giveBookBack(String booksISBN) {
+    public boolean giveBookBack(String bookISBN) {
         String sqlQuery = "UPDATE Books SET StatusLoaned = 0 WHERE BookISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
-            preparedStatement.setString(1, booksISBN);
+            preparedStatement.setString(1, bookISBN);
             int rowsAffected = preparedStatement.executeUpdate();
             if(rowsAffected == 1){
                 return true;
@@ -144,8 +142,18 @@ public class BooksDAOMysql implements BooksDAO{
     }
 
     @Override
-    public boolean getStatusLoanedBook(String bookISBN) {
-        return false;
+    public Book getBookObjByISBN(String bookISBN) {
+        String sqlQuery = "SELECT * FROM Books WHERE ISBN = ?;";
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+            preparedStatement.setString(1, bookISBN);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()){
+                return new Book(rs.getString("ISBN"), rs.getString("Name"), rs.getString("Author"), rs.getInt("NumberPages"), rs.getBoolean("StatusLoaned"));
+            }
+        }catch(SQLException e){
+            errorManager(e.getMessage());
+        }
+        return null;
     }
 
 

@@ -195,11 +195,13 @@ public class App {
         System.out.println("Give me your id");
         clientId = Integer.getInteger(scanner.nextLine().trim());
         bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
-        //check if book is loaned or not already
         dateEnd = dateNow.plusDays(length);
         boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
         if(ok){
             System.out.println("Loan added successfully");
+        }
+        else{
+            System.out.println("Could not add the loan");
         }
     }
 
@@ -207,10 +209,13 @@ public class App {
         Integer loanId;
         System.out.println("Give me the id of the loan you want to deactivate");
         loanId = scanner.nextInt();
-        boolean ok = LoanController.deactivateLoan(loanId);
-        //make the book that is in the loan not loaned anymore
-        if(ok){
+        int status = LoanController.deactivateLoan(loanId);
+        if(status == 2){
             System.out.println("Loan deactivated successfully");
+        } else if (status == 1) {
+            System.out.println("Could not give the book back");
+        }else{
+            System.out.println("Could not deactivate the loan");
         }
     }
 
@@ -243,10 +248,11 @@ public class App {
         Integer id;
         System.out.println("Give me the id of the client:");
         id = scanner.nextInt();
-        //check if client has loaned books at the moment of the removal
-        boolean ok = ClientController.removeClient(id);
-        if(ok){
+        boolean status = ClientController.removeClient(id);
+        if(status){
             System.out.println("The deletion was a success");
+        }else{
+            System.out.println("Can't delete the client because he/she has active loans");
         }
 
     }
@@ -267,37 +273,47 @@ public class App {
     }
 
     static void removeBook(Scanner scanner){
-        //check if book is loaned at the moment of the removal
         String bookName, ISBN, authorName;
         System.out.println("Give me the name of the book you want to remove:");
         bookName = scanner.nextLine().toUpperCase().trim();
         System.out.println("Give me the author of the book you want to remove:");
         authorName = scanner.nextLine().trim().toUpperCase();
         ISBN = BookController.getBookISBNByNameAndAuthor(bookName, authorName);
-        BookController.removeBook(ISBN);
-        //books
-
-    }
-
-    static void checkActiveLoansClient(Scanner scanner){
-        String clientId;
-        System.out.println("Provide me the user ID:");
-        clientId = scanner.nextLine().trim();
-        if(clients.containsKey(clientId)){
-            HashSet<Loan> loansOfClient = ClientController.getActiveLoansOfClient(loans, clientId);
-            if(!loansOfClient.isEmpty()){
-                for(Loan i:loansOfClient){
-                    System.out.println("Loan ID: " + i.getId() + " for book: " + books.get(i.getBookISBN()).getName());
-                }
-            }
-            else{
-                System.out.println("No active loans");
-            }
+        int statusRemove = BookController.removeBook(ISBN);
+        if(statusRemove == 2){
+            System.out.println("Successfully removed");
+        }else if(statusRemove == 1){
+            System.out.println("Could not remove because the book is not in db");
         }else{
-            System.out.println("The client ID is not valid");
+            System.out.println("Could not remove because the book is loaned");
         }
     }
 
+    static void checkActiveLoansClient(Scanner scanner){
+        Integer clientId;
+        System.out.println("Provide me the user ID:");
+        clientId = scanner.nextInt();
+        Client client = ClientController.getClientIfExists(clientId);
+        if(client != null){
+            HashSet<Loan> activeLoans = LoanController.getActiveLoansOfClient(clientId);
+            for(Loan i : activeLoans){
+                Book book = BookController.getBookObjByISBN(i.getBookISBN());
+                if(book != null){
+                    System.out.println("Loan for book " + book.getName() + " by " + book.getAuthor());
+                    if(i.getLoanEnd().isBefore(LocalDate.now())){
+                        System.out.println("Expired on " + i.getLoanEnd());
+                    }else{
+                        System.out.println("Available until " + i.getLoanEnd());
+                    }
+                }
+                System.out.println();
+            }
+        }
+        else{
+            System.out.println("Client does not exist");
+        }
+    }
+//here
     static void giveBackLoanedBook(Scanner scanner){
         //change the status of the loan and of the book that was loaned
         String bookName, bookISBN, clientID;
@@ -327,5 +343,5 @@ public class App {
     }
     //TO DO sql transition:
     //Scanner - member of App class
-    //dao folder - implements an interface and then an implementDaoMysqlBook class and like this for each one
+    //add role based login
 }

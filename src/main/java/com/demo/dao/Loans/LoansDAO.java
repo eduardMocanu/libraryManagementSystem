@@ -1,6 +1,7 @@
 package com.demo.dao.Loans;
 
 import com.demo.model.Loan;
+import jakarta.mail.internet.InternetAddress;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,4 +16,7 @@ public interface LoansDAO {
     HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId);
     void returnBook(Integer clientId, String bookISBN);
     Loan getALoanData(String bookISBN, Integer clientId);
+    boolean checkIfISBNIsLoaned(String bookISBN);
+    String getBookISBNOfLoan(Integer loanId);
+    boolean activateLoan(Integer loanId);
 }
