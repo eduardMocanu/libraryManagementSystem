@@ -22,6 +22,7 @@ public class App {
 //    public static final BookServiceCsv bookServiceCsv = new BookServiceCsv("data/books.csv");
 //    public static final LoanServiceCsv loanServiceCsv = new LoanServiceCsv("data/loans.csv");
 //    public static final ClientServiceCsv clientServiceCsv = new ClientServiceCsv("data/clients.csv");
+    private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args){
         menuInputHandler();
@@ -53,7 +54,6 @@ public class App {
 //        Map<String, Client> clients;
 
         boolean run = true;
-        Scanner scanner = new Scanner(System.in);
 //        books = bookServiceCsv.readCSVFile();
 //        loans = loanServiceCsv.readCSVFile();
 //        clients = clientServiceCsv.readCSVFile();
@@ -61,41 +61,41 @@ public class App {
 
         while(run){
             menuPrinter();
-            menuOption = handleUserMenuInput(scanner);
+            menuOption = handleUserMenuInput();
 
             switch (menuOption){
                 case CHECK_ALL_LOANS -> {
                     checkAllLoansIfEnding();
                 }
                 case CHECK_A_LOAN ->{
-                    checkALoanData(scanner,);
+                    checkALoanData();
                 }
                 case ADD_LOAN -> {
-                    addLoan(scanner);
+                    addLoan();
                 }
                 case DEACTIVATE_LOAN -> {
-                    deactivateLoanTechnicalProblem(scanner);
+                    deactivateLoanTechnicalProblem();
                 }
                 case ADD_CLIENT -> {
-                    addClient(scanner);
+                    addClient();
                 }
                 case REMOVE_CLIENT -> {
-                    removeClient(scanner);
+                    removeClient();
                 }
                 case ADD_BOOK -> {
-                    addBook(scanner);
+                    addBook();
                 }
                 case REMOVE_BOOK -> {
-                    removeBook(scanner);
+                    removeBook();
                 }
                 case CHECK_ACTIVE_LOANS_CLIENT -> {
-                    checkActiveLoansClient(scanner);
+                    checkActiveLoansClient();
                 }
                 case GIVE_BACK_LOANED_BOOK -> {
-                    giveBackLoanedBook(scanner);
+                    giveBackLoanedBook();
                 }
                 case CHECK_HISTORY_OF_CLIENT -> {
-                    checkHistoryOfClient(scanner);
+                    checkHistoryOfClient();
                 }
                 case EXIT ->{
                     run = false;
@@ -106,10 +106,9 @@ public class App {
                 }
             }
         }
-        scanner.close();
     }
 
-    static MenuOptions handleUserMenuInput(Scanner scanner){
+    static MenuOptions handleUserMenuInput(){
         int valueRead;
         while(true){
             try{
@@ -124,7 +123,7 @@ public class App {
 
     }
 
-    static int readInt(Scanner scanner, String prompt){
+    static int readInt(String prompt){
         int value;
         while(true){
             try{
@@ -147,7 +146,7 @@ public class App {
         LoanController.checkAllLoansSendEmail();
     }
 
-    static void checkALoanData(Scanner scanner){
+    static void checkALoanData(){
         System.out.println("Give me your client Id:");
         Integer clientId = scanner.nextInt();
         System.out.println("Give me the name of the book you have loaned:");
@@ -172,7 +171,7 @@ public class App {
         }
     }
 
-    static void addLoan(Scanner scanner){
+    static void addLoan(){
         LocalDate dateNow = LocalDate.now();
         LocalDate dateEnd;
         String bookISBN;
@@ -190,22 +189,27 @@ public class App {
         String bookName = scanner.nextLine().toUpperCase().trim();
         System.out.println("Give me the book author");
         String bookAuthor = scanner.nextLine().trim().toUpperCase();
-        length = readInt(scanner, "Give me the length of the loan");
+        length = readInt("Give me the length of the loan");
         scanner.nextLine();//to empty the buffer from the int
         System.out.println("Give me your id");
         clientId = Integer.getInteger(scanner.nextLine().trim());
         bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
-        dateEnd = dateNow.plusDays(length);
-        boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
-        if(ok){
-            System.out.println("Loan added successfully");
+        if(bookISBN!=null){
+            dateEnd = dateNow.plusDays(length);
+            boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
+            if(ok){
+                System.out.println("Loan added successfully");
+            }
+            else{
+                System.out.println("Could not add the loan");
+            }
         }
         else{
-            System.out.println("Could not add the loan");
+            System.out.println("Did not find book");
         }
     }
 
-    static void deactivateLoanTechnicalProblem(Scanner scanner){
+    static void deactivateLoanTechnicalProblem(){
         Integer loanId;
         System.out.println("Give me the id of the loan you want to deactivate");
         loanId = scanner.nextInt();
@@ -219,7 +223,7 @@ public class App {
         }
     }
 
-    static void addClient(Scanner scanner){
+    static void addClient(){
         String name, email;
         System.out.println("Give me the name:");
         name = scanner.nextLine().trim().toUpperCase();
@@ -244,7 +248,7 @@ public class App {
         }
     }
 
-    static void removeClient(Scanner scanner){
+    static void removeClient(){
         Integer id;
         System.out.println("Give me the id of the client:");
         id = scanner.nextInt();
@@ -256,7 +260,7 @@ public class App {
         }
 
     }
-    static void addBook(Scanner scanner){
+    static void addBook(){
         String ISBN, bookName, author;
         int pages;
         System.out.println("Give me the ISBN of the book:");
@@ -265,14 +269,14 @@ public class App {
         bookName = scanner.nextLine().toUpperCase().trim();
         System.out.println("Give me the author");
         author = scanner.nextLine().trim().toUpperCase();
-        pages = readInt(scanner, "Give me the number of pages that the book has:");
+        pages = readInt("Give me the number of pages that the book has:");
         boolean ok = BookController.addBook(new Book(ISBN, bookName, author, pages, false));
         if(ok){
             System.out.println("Book added successfully");
         }
     }
 
-    static void removeBook(Scanner scanner){
+    static void removeBook(){
         String bookName, ISBN, authorName;
         System.out.println("Give me the name of the book you want to remove:");
         bookName = scanner.nextLine().toUpperCase().trim();
@@ -289,7 +293,7 @@ public class App {
         }
     }
 
-    static void checkActiveLoansClient(Scanner scanner){
+    static void checkActiveLoansClient(){
         Integer clientId;
         System.out.println("Provide me the user ID:");
         clientId = scanner.nextInt();
@@ -313,35 +317,48 @@ public class App {
             System.out.println("Client does not exist");
         }
     }
-//here
-    static void giveBackLoanedBook(Scanner scanner){
+
+    static void giveBackLoanedBook(){
         //change the status of the loan and of the book that was loaned
-        String bookName, bookISBN, clientID;
+        String bookName, bookAuthor;
+        Integer clientId;
         System.out.println("Give me the name of the book you want to give back:");
         bookName = scanner.nextLine().trim().toUpperCase();
+        System.out.println("Give me the name of the author of the book");
+        bookAuthor = scanner.nextLine().trim().toUpperCase();
         System.out.println("Give me your client ID");
-        clientID = scanner.nextLine().trim();
-        bookISBN = BookController.getBookISBNByName(scanner, books, bookName);
-        LoanController.giveBookBack(loans, clients, books, bookISBN, clientID);
-
+        clientId = scanner.nextInt();
+        int status = LoanController.giveBookBack(bookName, bookAuthor, clientId);
+        if(status == 2){
+            System.out.println("The give back was ok");
+        }else if(status == 1){
+            System.out.println("Problem at loan inactivation");
+        }else{
+            System.out.println("Problem at book status change");
+        }
     }
 
-    static void checkHistoryOfClient(Scanner scanner){
-        String clientId;
+    static void checkHistoryOfClient(){
+        Integer clientId;
         System.out.println("Give me the user ID:");
-        clientId = scanner.nextLine().trim();
-        if(clients.containsKey(clientId)){
-            ClientController.getHistoryOfClient(loans, books, clientId);
-        }else{
-            System.out.println("The client is not registered");
+        clientId = scanner.nextInt();
+        Client client = ClientController.getClientIfExists(clientId);
+        if(client!=null){
+            HashMap<Integer, Loan> history = LoanController.getHistoryOfClient(clientId);
+            for(Loan i : history.values()){
+                Book book = BookController.getBookObjByISBN(i.getBookISBN());
+                if(book != null){
+                    System.out.println("BOOK: " + book.getName() + " started: " + i.getLoanStart() + " current status: " + i.getActive());
+                }
+            }
         }
+
     }
 
     static void exit(){
         System.out.println("Exiting...");
-
     }
     //TO DO sql transition:
-    //Scanner - member of App class
     //add role based login
+    //update loan end when giving the book back so that I can display correct info when I get the history of client
 }

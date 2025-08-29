@@ -14,7 +14,7 @@ public interface LoansDAO {
     Integer getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);
     HashSet<Loan> getActiveLoansOfClientByClientId(Integer clientId);
     HashMap<Integer, Loan> getHistoryOfClientByClientId(Integer clientId);
-    void returnBook(Integer clientId, String bookISBN);
+    boolean returnBook(Integer clientId, String bookISBN);
     Loan getALoanData(String bookISBN, Integer clientId);
     boolean checkIfISBNIsLoaned(String bookISBN);
     String getBookISBNOfLoan(Integer loanId);

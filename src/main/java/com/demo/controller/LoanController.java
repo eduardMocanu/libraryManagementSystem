@@ -66,9 +66,22 @@ public abstract class LoanController {
         return loanSql.getExpiredLoansOfClientById(clientId);
     }
 
-    public static void giveBookBack(String bookName, String bookAuthor, Integer clientId) {
+    public static int giveBookBack(String bookName, String bookAuthor, Integer clientId) {
         String bookISBN = booksSql.getBookISBNByNameAndAuthor(bookName, bookAuthor);
-        loanSql.returnBook(clientId, bookISBN);
+        if(bookISBN != null){
+            boolean okBooks = booksSql.giveBookBack(bookISBN);
+            if(okBooks){
+                boolean okLoans = loanSql.returnBook(clientId, bookISBN);
+                if(okLoans){
+                    return 2;//all good
+                }else{
+                    booksSql.loanBook(bookISBN);
+                    return 1;//problem at loan inactivation
+                }
+            }
+        }
+        return 0;//problem book status change
+
     }
 
     public static HashSet<Loan> getActiveLoansOfClient(Integer clientId) {

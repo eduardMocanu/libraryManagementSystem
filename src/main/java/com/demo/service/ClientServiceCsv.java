@@ -28,7 +28,7 @@ public class ClientServiceCsv {
             header = csvReader.readNext();
             String[] row;
             while((row = csvReader.readNext()) != null){
-                Client client = new Client(row[0].trim(), row[1].toUpperCase().trim(), row[2].toUpperCase().trim(), row[3].trim());
+                Client client = new Client(row[2].toUpperCase().trim(), row[3].trim());
                 fileRead.put(row[0], client);
             }
         }
@@ -42,7 +42,7 @@ public class ClientServiceCsv {
         try(CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))){
             csvWriter.writeNext(header);
             for(Client i:clients.values()){
-                String[] line = {i.getId().toUpperCase().trim(), i.getName().toUpperCase().trim(), i.getSurname().toUpperCase().trim(), i.getEmail().trim()};
+                String[] line = {i.getName().toUpperCase().trim(), i.getEmail().trim()};
                 csvWriter.writeNext(line);
             }
         } catch (IOException e) {

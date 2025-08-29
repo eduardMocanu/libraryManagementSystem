@@ -137,7 +137,7 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public void returnBook(Integer clientId, String bookISBN) {
+    public boolean returnBook(Integer clientId, String bookISBN) {
         String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ClientId = ? AND BookISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
@@ -145,13 +145,15 @@ public class LoansDAOMysql implements LoansDAO{
             int rowsAffected = preparedStatement.executeUpdate();
             if(rowsAffected == 0){
                 System.out.println("No loan with this data");
+                return false;
             }else{
                 System.out.println("Loan updated successfully");
+                return true;
             }
         }catch (SQLException e){
             errorManager(e.getMessage());
         }
-        //set status not loaned in books as well
+        return false;
     }
 
     @Override
@@ -172,7 +174,7 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public boolean checkIfISBNIsLoaned(String bookISBN) {
-        String sqlQUery = "SELECT * FROM Loans WHERE BookISBN = ?:";
+        String sqlQUery = "SELECT * FROM Loans WHERE BookISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQUery)){
             preparedStatement.setString(1, bookISBN);
             ResultSet rs = preparedStatement.executeQuery();

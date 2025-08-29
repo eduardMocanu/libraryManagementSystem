@@ -111,7 +111,7 @@ public class BooksDAOMysql implements BooksDAO{
 
     @Override
     public boolean loanBook(String bookISBN) {
-        String sqlQuery = "UPDATE Books SET statusLoaned = 1 WHERE bookISBN = ?;";
+        String sqlQuery = "UPDATE Books SET statusLoaned = 1 WHERE BookISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, bookISBN);
             int affectedRows = preparedStatement.executeUpdate();

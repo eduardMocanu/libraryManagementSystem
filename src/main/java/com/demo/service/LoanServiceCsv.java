@@ -28,7 +28,7 @@ public class LoanServiceCsv {
             String[] row;
             while((row = csvReader.readNext()) != null){
                 LocalDate startTime = LocalDate.parse(row[1]), endTime = LocalDate.parse(row[2]);
-                Loan loan = new Loan(row[0].trim(), startTime, endTime, row[3], row[4], Boolean.parseBoolean(row[5]), Boolean.parseBoolean(row[6]));
+                Loan loan = new Loan(startTime, endTime, Integer.parseInt(row[3]), row[4], Boolean.parseBoolean(row[5]), Boolean.parseBoolean(row[6]));
                 fileRead.put(row[0], loan);
             }
         }
@@ -42,7 +42,7 @@ public class LoanServiceCsv {
         try(CSVWriter csvWriter = new CSVWriter(new FileWriter(filePath))){
             csvWriter.writeNext(header);
             for(Loan i:loans.values()){
-                String[] line = {i.getId().trim(), i.getLoanStart().toString(), i.getLoanEnd().toString(), i.getClientId(), i.getBookISBN(), String.valueOf(i.getActive()), String.valueOf(i.getEmailed())};
+                String[] line = {i.getLoanStart().toString(), i.getLoanEnd().toString(), String.valueOf(i.getClientId()), i.getBookISBN(), String.valueOf(i.getActive()), String.valueOf(i.getEmailed())};
                 csvWriter.writeNext(line);
             }
         } catch (IOException e) {
