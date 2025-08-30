@@ -4,10 +4,7 @@ import com.demo.dao.Logs.LogsDAOMysql;
 import com.demo.dbConnection.MysqlDbConnection;
 import com.demo.model.Client;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class ClientsDAOMysql implements ClientsDAO{
 
@@ -21,7 +18,7 @@ public class ClientsDAOMysql implements ClientsDAO{
     @Override
     public Integer addClient(Client client){
         String sqlQuery = "INSERT INTO Clients (Name, Email) VALUES (?, ?);";
-        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
+        try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS)){
             preparedStatement.setString(1, client.getName());
             preparedStatement.setString(2, client.getEmail());
             int rowsAffected = preparedStatement.executeUpdate();
@@ -38,10 +35,11 @@ public class ClientsDAOMysql implements ClientsDAO{
         }catch(SQLException e){
             if(e.getErrorCode() == 1062){
                 System.out.println("Attempted to insert an email that already exists");
+            }else{
+                errorManager(e.getMessage());
             }
-            errorManager(e.getMessage());
-            return null;
         }
+        return null;
     }
     @Override
     public String getNameById(Integer clientId){

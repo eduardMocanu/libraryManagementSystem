@@ -32,9 +32,11 @@ public class BooksDAOMysql implements BooksDAO{
             if(e.getErrorCode() == 1062){
                 System.out.println("Attempted to insert an ISBN that already exists");
             }
-            errorManager(e.getMessage());
-            return false;
+            else{
+                errorManager(e.getMessage());
+            }
         }
+        return false;
     }
 
     @Override
@@ -77,10 +79,8 @@ public class BooksDAOMysql implements BooksDAO{
             preparedStatement.setString(1, bookName);
             preparedStatement.setString(2, author);
             ResultSet rs = preparedStatement.executeQuery();
-            if(rs.next()){
+            if(rs.next()) {
                 return rs.getString("ISBN");
-            }else{
-                System.out.println("Book not found");
             }
         }catch(SQLException e){
             errorManager(e.getMessage());
@@ -111,7 +111,7 @@ public class BooksDAOMysql implements BooksDAO{
 
     @Override
     public boolean loanBook(String bookISBN) {
-        String sqlQuery = "UPDATE Books SET statusLoaned = 1 WHERE BookISBN = ?;";
+        String sqlQuery = "UPDATE Books SET statusLoaned = 1 WHERE ISBN = ?;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, bookISBN);
             int affectedRows = preparedStatement.executeUpdate();

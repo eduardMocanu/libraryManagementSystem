@@ -149,6 +149,7 @@ public class App {
     static void checkALoanData(){
         System.out.println("Give me your client Id:");
         Integer clientId = scanner.nextInt();
+        scanner.nextLine();
         System.out.println("Give me the name of the book you have loaned:");
         String bookName = scanner.nextLine().trim().toUpperCase();
         System.out.println("Give me the author of the book you have loaned:");
@@ -168,6 +169,8 @@ public class App {
             else{
                 System.out.println("Loan is inactive");
             }
+        }else{
+            System.out.println("There is not a loan found with the data provided");
         }
     }
 
@@ -178,35 +181,40 @@ public class App {
         Integer clientId;
         int length;
         HashMap<String, ArrayList<String>> booksAvailable = BookController.getAvailableBooksByAuthor();
-        for(String i:booksAvailable.keySet()){
-            ArrayList<String> titles = booksAvailable.get(i);
-            System.out.println(i + ":");
-            for(String title:titles){
-                System.out.println("  -" + title);
+        if(!booksAvailable.isEmpty()){
+            for(String i:booksAvailable.keySet()){
+                ArrayList<String> titles = booksAvailable.get(i);
+                System.out.println(i + ":");
+                for(String title:titles){
+                    System.out.println("  -" + title);
+                }
             }
-        }
-        System.out.println("Give me the book name");
-        String bookName = scanner.nextLine().toUpperCase().trim();
-        System.out.println("Give me the book author");
-        String bookAuthor = scanner.nextLine().trim().toUpperCase();
-        length = readInt("Give me the length of the loan");
-        scanner.nextLine();//to empty the buffer from the int
-        System.out.println("Give me your id");
-        clientId = Integer.getInteger(scanner.nextLine().trim());
-        bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
-        if(bookISBN!=null){
-            dateEnd = dateNow.plusDays(length);
-            boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
-            if(ok){
-                System.out.println("Loan added successfully");
+            System.out.println("Give me the book name");
+            String bookName = scanner.nextLine().toUpperCase().trim();
+            System.out.println("Give me the book author");
+            String bookAuthor = scanner.nextLine().trim().toUpperCase();
+            length = readInt("Give me the length of the loan");
+            scanner.nextLine();//to empty the buffer from the int
+            System.out.println("Give me your id");
+            clientId = scanner.nextInt();
+            bookISBN = BookController.getBookISBNByNameAndAuthor(bookName, bookAuthor);
+            if(bookISBN!=null){
+                dateEnd = dateNow.plusDays(length);
+                boolean ok = LoanController.addLoan(new Loan(dateNow, dateEnd, clientId, bookISBN, true, false));
+                if(ok){
+                    System.out.println("Loan added successfully");
+                }
+                else{
+                    System.out.println("Could not add the loan");
+                }
             }
             else{
-                System.out.println("Could not add the loan");
+                System.out.println("Did not find book");
             }
+        }else{
+            System.out.println("There are no available books");
         }
-        else{
-            System.out.println("Did not find book");
-        }
+
     }
 
     static void deactivateLoanTechnicalProblem(){
@@ -227,7 +235,6 @@ public class App {
         String name, email;
         System.out.println("Give me the name:");
         name = scanner.nextLine().trim().toUpperCase();
-        System.out.println("Give me the surname:");
         while(true){
             try{
                 System.out.println("Give me your email:");
@@ -252,9 +259,11 @@ public class App {
         Integer id;
         System.out.println("Give me the id of the client:");
         id = scanner.nextInt();
-        boolean status = ClientController.removeClient(id);
-        if(status){
+        int status = ClientController.removeClient(id);
+        if(status == 2){
             System.out.println("The deletion was a success");
+        }else if(status == 1){
+            System.out.println("The client is not in the database");
         }else{
             System.out.println("Can't delete the client because he/she has active loans");
         }
@@ -361,4 +370,17 @@ public class App {
     //TO DO sql transition:
     //add role based login
     //update loan end when giving the book back so that I can display correct info when I get the history of client
+
+//    1
+//    2 <3
+//    3 <3
+//    4
+//    5 <3
+//    6 <3
+//    7 <3
+//    8 <3
+//    9
+//    10
+//    11
+//
 }
