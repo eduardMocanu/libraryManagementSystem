@@ -34,32 +34,40 @@ public abstract class LoanController {
 
     public static void checkAllLoansSendEmail() {
         HashMap<Integer, Loan> expiredLoans = loanSql.getExpiredLoans();
-        for (Loan i : expiredLoans.values()) {
-            Client client = clientSql.getClientObjById(i.getClientId());
-            String bookName = booksSql.getNameByISBN(i.getBookISBN());
-            if (!i.getEmailed()) {
-                if (client != null && bookName != null) {
-                    EmailService.sendEmailTo(client.getEmail(), bookName, client.getName(), String.valueOf(i.getLoanEnd()));
-                    System.out.println("Email sent to " + client.getName() + " for book: " + bookName);
+        if(!expiredLoans.isEmpty()){
+            for (Loan i : expiredLoans.values()) {
+                Client client = clientSql.getClientObjById(i.getClientId());
+                String bookName = booksSql.getNameByISBN(i.getBookISBN());
+                if (!i.getEmailed()) {
+                    if (client != null && bookName != null) {
+                        EmailService.sendEmailTo(client.getEmail(), bookName, client.getName(), String.valueOf(i.getLoanEnd()));
+                        System.out.println("Email sent to " + client.getName() + " for book: " + bookName);
+                    }
+                } else {
+                    System.out.println("The client " + client.getName() + " was already emailed for the loan of book " + bookName);
                 }
-            } else {
-                System.out.println("The client " + client.getName() + " was already emailed for the loan of book " + bookName);
             }
+        }
+        else{
+            System.out.println("There are no expired loans");
         }
     }
 
     public static int deactivateLoan(Integer loanId) {
         String bookISBN = loanSql.getBookISBNOfLoan(loanId);
-        boolean ok = loanSql.deactivateLoan(loanId);
-        if(ok){
+        int ok = loanSql.deactivateLoan(loanId);
+        if(ok >= 1){
             if(booksSql.giveBookBack(bookISBN)){
                 return 2;//operation successful
             }else{
                 loanSql.activateLoan(loanId);
-                return 1;//could not give the book back
+                return 4;//could not give book back
             }
+        } else if (ok == 0) {
+            return 1;//no loan active
+        }else{
+            return 0; //could not deactivate loan
         }
-        return 0; //could not deactivate loan
     }
 
     public static HashMap<Integer, Loan> checkExpiredLoansClient(Integer clientId) {
@@ -76,11 +84,13 @@ public abstract class LoanController {
                     return 2;//all good
                 }else{
                     booksSql.loanBook(bookISBN);
-                    return 1;//problem at loan inactivation
+                    return 1;//problem at loan inactivation client id is not correct in some way
                 }
+            }else{
+                return 4;//can not give back the book, technical problem
             }
         }
-        return 0;//problem book status change
+        return 0;//book not in db
 
     }
 

@@ -23,13 +23,16 @@ public abstract class ClientController {
         HashSet<Loan> expiredLoansOfClient = loanSql.getActiveLoansOfClientByClientId(clientId);
         Client client = clientSql.getClientObjById(clientId);
         if(!expiredLoansOfClient.isEmpty()){
-            System.out.println(expiredLoansOfClient.size());
+            //System.out.println(expiredLoansOfClient.size());
             return 0;//client has expired loans
         } else if (client == null) {
             return 1;//client id is not in db
         }
-        clientSql.removeClientById(clientId);
-        return 2;//all ok
+        if(clientSql.removeClientById(clientId)){
+            return 2;//all ok
+        }else{
+            return 4; //could not remove the client
+        }
     }
 
     public static Client getClientIfExists(Integer clientId){

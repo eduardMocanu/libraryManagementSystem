@@ -6,14 +6,9 @@ import com.demo.controller.LoanController;
 import com.demo.model.Book;
 import com.demo.model.Client;
 import com.demo.model.Loan;
-import com.demo.service.BookServiceCsv;
-import com.demo.service.ClientServiceCsv;
-import com.demo.service.LoanServiceCsv;
-import com.demo.service.LogsServiceCsv;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 
-import java.sql.SQLOutput;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -41,7 +36,7 @@ public class App {
         System.out.println("6.REMOVE CLIENT");
         System.out.println("7.ADD BOOK");
         System.out.println("8.REMOVE BOOK");
-        System.out.println("9.CHECK ALL LOANS FOR A CLIENT");
+        System.out.println("9.CHECK ACTIVE LOANS OF A CLIENT");
         System.out.println("10.GIVE BACK LOANED BOOK");
         System.out.println("11.CHECK THE HISTORY OF CLIENT");
         System.out.println("12.EXIT");
@@ -225,7 +220,7 @@ public class App {
         if(status == 2){
             System.out.println("Loan deactivated successfully");
         } else if (status == 1) {
-            System.out.println("Could not give the book back");
+            System.out.println("Could not find the active loan");
         }else{
             System.out.println("Could not deactivate the loan");
         }
@@ -264,8 +259,10 @@ public class App {
             System.out.println("The deletion was a success");
         }else if(status == 1){
             System.out.println("The client is not in the database");
-        }else{
+        }else if(status == 0){
             System.out.println("Can't delete the client because he/she has active loans");
+        }else{
+            System.out.println("Can't remove the client, technical problem");
         }
 
     }
@@ -309,18 +306,23 @@ public class App {
         Client client = ClientController.getClientIfExists(clientId);
         if(client != null){
             HashSet<Loan> activeLoans = LoanController.getActiveLoansOfClient(clientId);
-            for(Loan i : activeLoans){
-                Book book = BookController.getBookObjByISBN(i.getBookISBN());
-                if(book != null){
-                    System.out.println("Loan for book " + book.getName() + " by " + book.getAuthor());
-                    if(i.getLoanEnd().isBefore(LocalDate.now())){
-                        System.out.println("Expired on " + i.getLoanEnd());
-                    }else{
-                        System.out.println("Available until " + i.getLoanEnd());
+            if(!activeLoans.isEmpty()){
+                for(Loan i : activeLoans){
+                    Book book = BookController.getBookObjByISBN(i.getBookISBN());
+                    if(book != null){
+                        System.out.println("Loan for book " + book.getName() + " by " + book.getAuthor());
+                        if(i.getLoanEnd().isBefore(LocalDate.now())){
+                            System.out.println("Expired on " + i.getLoanEnd());
+                        }else{
+                            System.out.println("Available until " + i.getLoanEnd());
+                        }
                     }
+                    System.out.println();
                 }
-                System.out.println();
+            }else{
+                System.out.println("No active loans");
             }
+
         }
         else{
             System.out.println("Client does not exist");
@@ -341,9 +343,11 @@ public class App {
         if(status == 2){
             System.out.println("The give back was ok");
         }else if(status == 1){
-            System.out.println("Problem at loan inactivation");
+            System.out.println("Problem at loan inactivation, client id is not correct");
+        }else if(status == 0){
+            System.out.println("The book is not found in the database");
         }else{
-            System.out.println("Problem at book status change");
+            System.out.println("Can't give back the book, most probably a technical problem");
         }
     }
 
@@ -354,12 +358,20 @@ public class App {
         Client client = ClientController.getClientIfExists(clientId);
         if(client!=null){
             HashMap<Integer, Loan> history = LoanController.getHistoryOfClient(clientId);
-            for(Loan i : history.values()){
-                Book book = BookController.getBookObjByISBN(i.getBookISBN());
-                if(book != null){
-                    System.out.println("BOOK: " + book.getName() + " started: " + i.getLoanStart() + " current status: " + i.getActive());
+            if(!history.isEmpty()){
+                for(Loan i : history.values()){
+                    Book book = BookController.getBookObjByISBN(i.getBookISBN());
+                    if(book != null){
+                        String status = i.getActive() ? "Active" : "Inactive";
+                        System.out.println("BOOK: " + book.getName() + " started: " + i.getLoanStart() + " current status: " + status);
+                    }
                 }
             }
+            else{
+                System.out.println("You have no history in this library");
+            }
+        }else{
+            System.out.println("The given client id does not exist");
         }
 
     }
@@ -369,18 +381,6 @@ public class App {
     }
     //TO DO sql transition:
     //add role based login
-    //update loan end when giving the book back so that I can display correct info when I get the history of client
+    //update loan end when giving the book back so that I can display correct info when I get the history of client to the endDate
 
-//    1
-//    2 <3
-//    3 <3
-//    4
-//    5 <3
-//    6 <3
-//    7 <3
-//    8 <3
-//    9
-//    10
-//    11
-//
 }

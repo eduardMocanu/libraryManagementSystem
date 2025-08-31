@@ -20,10 +20,9 @@ public class LogsDAOMysql implements LogsDAO{
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, prompt);
             int rowsAffected = preparedStatement.executeUpdate();
-            System.out.println(rowsAffected + " rows affected");
         }catch (SQLException e){
             System.out.println("Logs: " + e.getMessage());
-            throw new RuntimeException("Database problem Logs DAO");
+            //throw new RuntimeException("Database problem Logs DAO");
         }
     }
 }

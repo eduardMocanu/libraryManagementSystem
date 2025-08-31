@@ -26,7 +26,6 @@ public class BooksDAOMysql implements BooksDAO{
             preparedStatement.setString(3, book.getAuthor());
             preparedStatement.setInt(4, book.getNumberPages());
             int rowsAffected = preparedStatement.executeUpdate();
-            System.out.println(rowsAffected + " row(s) affected");
             return true;
         } catch (SQLException e) {
             if(e.getErrorCode() == 1062){
@@ -47,9 +46,6 @@ public class BooksDAOMysql implements BooksDAO{
             ResultSet rs = preparedStatement.executeQuery();
             if(rs.next()){
                 return rs.getString("Name");
-            }
-            else{
-                System.out.println("Did not find a book with that ISBN");
             }
         }catch(SQLException e){
             errorManager(e.getMessage());
@@ -127,7 +123,7 @@ public class BooksDAOMysql implements BooksDAO{
 
     @Override
     public boolean giveBookBack(String bookISBN) {
-        String sqlQuery = "UPDATE Books SET StatusLoaned = 0 WHERE BookISBN = ?;";
+        String sqlQuery = "UPDATE Books SET StatusLoaned = 0 WHERE ISBN = ? AND StatusLoaned = 1;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setString(1, bookISBN);
             int rowsAffected = preparedStatement.executeUpdate();
@@ -160,6 +156,6 @@ public class BooksDAOMysql implements BooksDAO{
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Books: " + value);
-        throw new RuntimeException("Database problem Books DAO " + value);
+        //throw new RuntimeException("Database problem Books DAO " + value);
     }
 }

@@ -9,7 +9,7 @@ import java.util.HashSet;
 public interface LoansDAO {
     boolean addLoan(Loan loan);
     HashMap<Integer, Loan> getExpiredLoans();
-    boolean deactivateLoan(Integer loanId);
+    int deactivateLoan(Integer loanId);
     HashMap<Integer, Loan> getExpiredLoansOfClientById(Integer clientId);
     Integer getLoanIdByBookISBNAndClientId(String bookISBN, Integer clientId);
     HashSet<Loan> getActiveLoansOfClientByClientId(Integer clientId);

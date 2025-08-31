@@ -28,7 +28,6 @@ public class LoansDAOMysql implements LoansDAO{
             preparedStatement.setInt(3, loan.getClientId());
             preparedStatement.setString(4, loan.getBookISBN());
             int rowsAffected = preparedStatement.executeUpdate();
-            System.out.println(rowsAffected + " rows affected");
             return true;
         }catch(SQLException e){
             errorManager(e.getMessage());
@@ -38,7 +37,7 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public HashMap<Integer, Loan> getExpiredLoans() {
-        String sqlQuery = "SELECT * FROM Loans WHERE LoanEnd < ?;";
+        String sqlQuery = "SELECT * FROM Loans WHERE LoanEnd < ? AND Active = TRUE;";
         HashMap<Integer, Loan> expiredLoans = new HashMap<>();
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setDate(1, Date.valueOf(LocalDate.now()));
@@ -53,23 +52,22 @@ public class LoansDAOMysql implements LoansDAO{
     }
 
     @Override
-    public boolean deactivateLoan(Integer loanId) {
-        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE Id = ?;";
+    public int deactivateLoan(Integer loanId) {
+        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE Id = ? AND Active = TRUE;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, loanId);
             int affectedRows = preparedStatement.executeUpdate();
-            System.out.println(affectedRows + " rows affected");
-            return true;
+            return affectedRows;
         } catch (SQLException e) {
             errorManager(e.getMessage());
-            return false;
+            return -1;
         }
     }
 
     @Override
     public HashMap<Integer, Loan> getExpiredLoansOfClientById(Integer clientId) {
         HashMap<Integer, Loan> expiredLoans = new HashMap<>();
-        String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ? AND LoanEnd < ?;";
+        String sqlQuery = "SELECT * FROM Loans WHERE ClientId = ? AND LoanEnd < ? AND Active = TRUE;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             preparedStatement.setDate(2, Date.valueOf(LocalDate.now()));
@@ -138,16 +136,14 @@ public class LoansDAOMysql implements LoansDAO{
 
     @Override
     public boolean returnBook(Integer clientId, String bookISBN) {
-        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ClientId = ? AND BookISBN = ?;";
+        String sqlQuery = "UPDATE Loans SET Active = 0 WHERE ClientId = ? AND BookISBN = ? AND Active = 1;";
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             preparedStatement.setString(2, bookISBN);
             int rowsAffected = preparedStatement.executeUpdate();
             if(rowsAffected == 0){
-                System.out.println("No loan with this data");
                 return false;
             }else{
-                System.out.println("Loan updated successfully");
                 return true;
             }
         }catch (SQLException e){
@@ -238,6 +234,6 @@ public class LoansDAOMysql implements LoansDAO{
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Loans: " + value);
-        throw new RuntimeException("Database problem Loans DAO " + value);
+        //throw new RuntimeException("Database problem Loans DAO " + value);
     }
 }

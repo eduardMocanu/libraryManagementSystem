@@ -22,7 +22,6 @@ public class ClientsDAOMysql implements ClientsDAO{
             preparedStatement.setString(1, client.getName());
             preparedStatement.setString(2, client.getEmail());
             int rowsAffected = preparedStatement.executeUpdate();
-            System.out.println(rowsAffected + " rows affected");
             Integer id = null;
             if(rowsAffected > 0){
                 try(ResultSet rs = preparedStatement.getGeneratedKeys()){
@@ -61,7 +60,6 @@ public class ClientsDAOMysql implements ClientsDAO{
         try(PreparedStatement preparedStatement = conn.prepareStatement(sqlQuery)){
             preparedStatement.setInt(1, clientId);
             int rowsAffected = preparedStatement.executeUpdate();
-            System.out.println(rowsAffected + " rows affected");
             return true;
         }catch (SQLException e){
             errorManager(e.getMessage());
@@ -88,6 +86,6 @@ public class ClientsDAOMysql implements ClientsDAO{
     private void errorManager(String value){
         System.out.println(value + " error occurred");
         logsMysql.writeLog("Clients: " + value);
-        throw new RuntimeException("Database problem Clients DAO " + value);
+        //throw new RuntimeException("Database problem Clients DAO " + value);
     }
 }
